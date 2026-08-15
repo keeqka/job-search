@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import type { ApplicationStatus, Priority } from '@/types';
 
 const STATUS_STYLES: Record<ApplicationStatus, string> = {
@@ -16,6 +17,7 @@ const STATUS_STYLES: Record<ApplicationStatus, string> = {
 };
 
 export function StatusBadge({ status, className }: { status: ApplicationStatus; className?: string }) {
+  const enumLabel = useEnumLabel();
   return (
     <span
       className={cn(
@@ -24,7 +26,7 @@ export function StatusBadge({ status, className }: { status: ApplicationStatus; 
         className,
       )}
     >
-      {status}
+      {enumLabel('applicationStatus', status)}
     </span>
   );
 }
@@ -36,6 +38,7 @@ const PRIORITY_STYLES: Record<Priority, string> = {
 };
 
 export function PriorityBadge({ priority, className }: { priority: Priority; className?: string }) {
+  const enumLabel = useEnumLabel();
   return (
     <span
       className={cn(
@@ -44,7 +47,7 @@ export function PriorityBadge({ priority, className }: { priority: Priority; cla
         className,
       )}
     >
-      {priority}
+      {enumLabel('priority', priority)}
     </span>
   );
 }

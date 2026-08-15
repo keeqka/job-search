@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
   Briefcase,
@@ -26,20 +27,21 @@ import { SeedDataButton } from '@/components/seed-data-button';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/applications', label: 'Applications', icon: Briefcase },
-  { to: '/interviews', label: 'Interviews', icon: CalendarCheck },
-  { to: '/companies', label: 'Companies', icon: Building2 },
-  { to: '/contacts', label: 'Contacts', icon: Users },
-  { to: '/offers', label: 'Offers', icon: Handshake },
-  { to: '/tasks', label: 'Tasks', icon: ListTodo },
-  { to: '/cv-versions', label: 'CV Versions', icon: FileText },
-  { to: '/statistics', label: 'Statistics', icon: BarChart3 },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/', key: 'dashboard', icon: LayoutDashboard, end: true },
+  { to: '/applications', key: 'applications', icon: Briefcase },
+  { to: '/interviews', key: 'interviews', icon: CalendarCheck },
+  { to: '/companies', key: 'companies', icon: Building2 },
+  { to: '/contacts', key: 'contacts', icon: Users },
+  { to: '/offers', key: 'offers', icon: Handshake },
+  { to: '/tasks', key: 'tasks', icon: ListTodo },
+  { to: '/cv-versions', key: 'cvVersions', icon: FileText },
+  { to: '/statistics', key: 'statistics', icon: BarChart3 },
+  { to: '/settings', key: 'settings', icon: Settings },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <Sidebar collapsible="icon">
@@ -57,10 +59,11 @@ export function AppSidebar() {
                 const isActive = item.end
                   ? location.pathname === item.to
                   : location.pathname.startsWith(item.to);
+                const label = t(`nav.${item.key}`);
                 return (
                   <SidebarMenuItem key={item.to}>
                     <SidebarMenuButton
-                      tooltip={item.label}
+                      tooltip={label}
                       render={
                         <NavLink
                           to={item.to}
@@ -70,7 +73,7 @@ export function AppSidebar() {
                       }
                     >
                       <item.icon />
-                      <span>{item.label}</span>
+                      <span>{label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

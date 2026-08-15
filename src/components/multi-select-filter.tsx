@@ -1,4 +1,5 @@
 import { Check, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -19,12 +20,16 @@ export function MultiSelectFilter({
   options,
   selected,
   onChange,
+  renderLabel = (v) => v,
 }: {
   label: string;
   options: readonly string[];
   selected: string[];
   onChange: (values: string[]) => void;
+  /** Maps a raw option value to its display label; the value passed to onChange stays untranslated. */
+  renderLabel?: (value: string) => string;
 }) {
+  const { t } = useTranslation();
   function toggle(value: string) {
     onChange(selected.includes(value) ? selected.filter((v) => v !== value) : [...selected, value]);
   }
@@ -56,7 +61,7 @@ export function MultiSelectFilter({
                     >
                       {isSelected && <Check className="size-3" />}
                     </div>
-                    <span>{option}</span>
+                    <span>{renderLabel(option)}</span>
                   </CommandItem>
                 );
               })}
@@ -66,7 +71,7 @@ export function MultiSelectFilter({
         {selected.length > 0 && (
           <div className="border-t p-1">
             <Button variant="ghost" size="sm" className="w-full justify-center" onClick={() => onChange([])}>
-              Clear filters
+              {t('common.clearFilters')}
             </Button>
           </div>
         )}

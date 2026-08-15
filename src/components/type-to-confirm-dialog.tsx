@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,7 +19,7 @@ export function TypeToConfirmDialog({
   title,
   description,
   confirmPhrase,
-  confirmLabel = 'Delete',
+  confirmLabel,
   pending = false,
   onConfirm,
 }: {
@@ -31,6 +32,7 @@ export function TypeToConfirmDialog({
   pending?: boolean;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   const [value, setValue] = useState('');
   const matches = value === confirmPhrase;
 
@@ -48,7 +50,9 @@ export function TypeToConfirmDialog({
 
         <div className="grid gap-2">
           <Label htmlFor="confirm-phrase">
-            Type <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">{confirmPhrase}</code> to confirm
+            {t('typeToConfirm.prefix')}{' '}
+            <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">{confirmPhrase}</code>{' '}
+            {t('typeToConfirm.suffix')}
           </Label>
           <Input
             id="confirm-phrase"
@@ -61,7 +65,7 @@ export function TypeToConfirmDialog({
 
         <AlertDialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             type="button"
@@ -70,7 +74,7 @@ export function TypeToConfirmDialog({
             onClick={onConfirm}
           >
             {pending && <Loader2 className="size-4 animate-spin" />}
-            {pending ? 'Deleting...' : confirmLabel}
+            {pending ? t('typeToConfirm.deleting') : (confirmLabel ?? t('common.delete'))}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
