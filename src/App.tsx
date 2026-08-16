@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AppLayout } from '@/components/layout/app-layout';
 import { AppRoutes } from '@/pages/routes';
+import { AuthGate } from '@/components/auth-gate';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,18 +18,20 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="job-crm-theme">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <BrowserRouter>
-            <AppLayout>
-              <AppRoutes />
-            </AppLayout>
-          </BrowserRouter>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <AuthGate>
+      <ThemeProvider defaultTheme="system" storageKey="job-crm-theme">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <BrowserRouter>
+              <AppLayout>
+                <AppRoutes />
+              </AppLayout>
+            </BrowserRouter>
+            <Toaster />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </AuthGate>
   );
 }
 
