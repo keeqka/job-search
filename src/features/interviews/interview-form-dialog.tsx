@@ -30,6 +30,7 @@ import { useCompanies } from '@/features/companies/hooks';
 import { useContacts } from '@/features/contacts/hooks';
 import { contactLabel } from '@/features/contacts/contact-label';
 import { useCreateInterview, useUpdateInterview } from '@/features/interviews/hooks';
+import { toDateKey } from '@/lib/utils/computed';
 import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
@@ -63,7 +64,7 @@ const EMPTY: FormValues = {
 };
 
 function toFormValues(interview?: Interview): FormValues {
-  if (!interview) return EMPTY;
+  if (!interview) return { ...EMPTY, date: toDateKey(new Date()) };
   return {
     applicationId: interview.applicationId ?? '',
     date: interview.date?.slice(0, 10) ?? '',
@@ -105,7 +106,7 @@ export function InterviewFormDialog({
 
   useEffect(() => {
     if (open) {
-      setValues(interview ? toFormValues(interview) : { ...EMPTY, applicationId: defaultApplicationId ?? '' });
+      setValues(interview ? toFormValues(interview) : { ...toFormValues(undefined), applicationId: defaultApplicationId ?? '' });
       setErrors({});
     }
   }, [open, interview, defaultApplicationId]);

@@ -28,6 +28,7 @@ import { useCompanies } from '@/features/companies/hooks';
 import { applicationLabel } from '@/features/applications/application-label';
 import { useCreateTask, useUpdateTask } from '@/features/tasks/hooks';
 import { useEnumLabel } from '@/i18n/enum-labels';
+import { toDateKey } from '@/lib/utils/computed';
 
 interface FormValues {
   applicationId: string;
@@ -48,7 +49,7 @@ const EMPTY: FormValues = {
 };
 
 function toFormValues(task?: Task): FormValues {
-  if (!task) return EMPTY;
+  if (!task) return { ...EMPTY, dueDate: toDateKey(new Date()) };
   return {
     applicationId: task.applicationId ?? '',
     type: task.type ?? '',
@@ -83,7 +84,7 @@ export function TaskFormDialog({
 
   useEffect(() => {
     if (open) {
-      setValues(task ? toFormValues(task) : { ...EMPTY, applicationId: defaultApplicationId ?? '' });
+      setValues(task ? toFormValues(task) : { ...toFormValues(undefined), applicationId: defaultApplicationId ?? '' });
       setErrors({});
     }
   }, [open, task, defaultApplicationId]);

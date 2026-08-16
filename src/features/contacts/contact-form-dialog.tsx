@@ -25,6 +25,7 @@ import {
 import { CONTACT_ROLES, type Contact } from '@/types';
 import { useCompanies } from '@/features/companies/hooks';
 import { useCreateContact, useUpdateContact } from '@/features/contacts/hooks';
+import { toDateKey } from '@/lib/utils/computed';
 import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
@@ -56,7 +57,10 @@ const EMPTY: FormValues = {
 };
 
 function toFormValues(contact?: Contact): FormValues {
-  if (!contact) return EMPTY;
+  if (!contact) {
+    const today = toDateKey(new Date());
+    return { ...EMPTY, firstContact: today, lastContact: today, nextContact: today };
+  }
   return {
     name: contact.name ?? '',
     companyId: contact.companyId ?? '',
@@ -95,7 +99,7 @@ export function ContactFormDialog({
 
   useEffect(() => {
     if (open) {
-      setValues(contact ? toFormValues(contact) : { ...EMPTY, companyId: defaultCompanyId ?? '' });
+      setValues(contact ? toFormValues(contact) : { ...toFormValues(undefined), companyId: defaultCompanyId ?? '' });
       setErrors({});
     }
   }, [open, contact, defaultCompanyId]);

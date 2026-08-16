@@ -28,6 +28,7 @@ import { useCompanies } from '@/features/companies/hooks';
 import { applicationLabel } from '@/features/applications/application-label';
 import { useCreateOffer, useUpdateOffer } from '@/features/offers/hooks';
 import { useEnumLabel } from '@/i18n/enum-labels';
+import { toDateKey } from '@/lib/utils/computed';
 
 interface FormValues {
   applicationId: string;
@@ -64,7 +65,10 @@ const EMPTY: FormValues = {
 };
 
 function toFormValues(offer?: Offer): FormValues {
-  if (!offer) return EMPTY;
+  if (!offer) {
+    const today = toDateKey(new Date());
+    return { ...EMPTY, offerDate: today, deadline: today };
+  }
   return {
     applicationId: offer.applicationId ?? '',
     baseSalary: offer.baseSalary != null ? String(offer.baseSalary) : '',
@@ -107,7 +111,7 @@ export function OfferFormDialog({
 
   useEffect(() => {
     if (open) {
-      setValues(offer ? toFormValues(offer) : { ...EMPTY, applicationId: defaultApplicationId ?? '' });
+      setValues(offer ? toFormValues(offer) : { ...toFormValues(undefined), applicationId: defaultApplicationId ?? '' });
       setErrors({});
     }
   }, [open, offer, defaultApplicationId]);

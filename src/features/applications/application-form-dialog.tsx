@@ -39,6 +39,7 @@ import { contactLabel } from '@/features/contacts/contact-label';
 import { useCvVersions } from '@/features/cv-versions/hooks';
 import { useCreateApplication, useUpdateApplication } from '@/features/applications/hooks';
 import { useEnumLabel } from '@/i18n/enum-labels';
+import { toDateKey } from '@/lib/utils/computed';
 
 interface FormValues {
   companyId: string;
@@ -93,7 +94,10 @@ const EMPTY: FormValues = {
 };
 
 function toFormValues(app?: Application): FormValues {
-  if (!app) return EMPTY;
+  if (!app) {
+    const today = toDateKey(new Date());
+    return { ...EMPTY, dateFound: today, dateApplied: today, nextActionDate: today };
+  }
   return {
     companyId: app.companyId ?? '',
     position: app.position ?? '',
@@ -150,7 +154,7 @@ export function ApplicationFormDialog({
   useEffect(() => {
     if (open) {
       setValues(
-        application ? toFormValues(application) : { ...EMPTY, companyId: defaultCompanyId ?? '' },
+        application ? toFormValues(application) : { ...toFormValues(undefined), companyId: defaultCompanyId ?? '' },
       );
       setErrors({});
     }

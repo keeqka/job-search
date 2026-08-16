@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { CvVersion } from '@/types';
 import { useCreateCvVersion, useUpdateCvVersion } from '@/features/cv-versions/hooks';
+import { toDateKey } from '@/lib/utils/computed';
 
 interface FormValues {
   version: string;
@@ -28,7 +29,7 @@ interface FormValues {
 const EMPTY: FormValues = { version: '', targetRole: '', createdDate: '', fileUrl: '', description: '' };
 
 function toFormValues(cv?: CvVersion): FormValues {
-  if (!cv) return EMPTY;
+  if (!cv) return { ...EMPTY, createdDate: toDateKey(new Date()) };
   return {
     version: cv.version ?? '',
     targetRole: cv.targetRole ?? '',
