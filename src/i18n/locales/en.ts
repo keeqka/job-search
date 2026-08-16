@@ -213,6 +213,13 @@ export const en = {
       contactsCount: 'Contacts ({{count}})',
       noContactsLinked: 'No contacts linked yet.',
     },
+    contactDetail: {
+      noDetailsYet: 'No details yet',
+      applicationsCount: 'Applications ({{count}})',
+      noApplicationsLinked: 'No applications linked yet.',
+      interviewsCount: 'Interviews ({{count}})',
+      noInterviewsLinked: 'No interviews linked yet.',
+    },
     companyForm: {
       editTitle: 'Edit company',
       newTitle: 'New company',

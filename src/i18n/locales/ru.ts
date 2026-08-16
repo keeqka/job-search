@@ -217,6 +217,13 @@ export const ru = {
       contactsCount: 'Контакты ({{count}})',
       noContactsLinked: 'Контакты не привязаны.',
     },
+    contactDetail: {
+      noDetailsYet: 'Пока нет деталей',
+      applicationsCount: 'Заявки ({{count}})',
+      noApplicationsLinked: 'Заявки не привязаны.',
+      interviewsCount: 'Интервью ({{count}})',
+      noInterviewsLinked: 'Интервью не привязаны.',
+    },
     companyForm: {
       editTitle: 'Изменить компанию',
       newTitle: 'Новая компания',

@@ -117,7 +117,7 @@ export function CvVersionFormDialog({
               />
               <FieldError message={errors.version} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="targetRole">{t('cvVersionForm.targetRole')}</Label>
                 <Input id="targetRole" value={values.targetRole} onChange={(e) => set('targetRole', e.target.value)} />

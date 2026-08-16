@@ -63,12 +63,12 @@ export function CompaniesPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Input
           placeholder={t('companies.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
+          className="w-full sm:max-w-xs"
         />
         <Button onClick={openCreate}>
           <Plus className="size-4" />

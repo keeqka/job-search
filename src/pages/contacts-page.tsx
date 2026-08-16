@@ -17,6 +17,7 @@ import { LoadingState, ErrorState, EmptyState } from '@/components/data-state';
 import { ConfirmDeleteDialog } from '@/components/confirm-delete-dialog';
 import { BulkActionsBar } from '@/components/bulk-actions-bar';
 import { ContactFormDialog } from '@/features/contacts/contact-form-dialog';
+import { ContactDetailSheet } from '@/features/contacts/contact-detail-sheet';
 import { useContacts, useDeleteContact, useBulkDeleteContacts } from '@/features/contacts/hooks';
 import { useCompanies } from '@/features/companies/hooks';
 import { useSelection } from '@/hooks/useSelection';
@@ -39,6 +40,7 @@ export function ContactsPage() {
   const [editing, setEditing] = useState<Contact | undefined>();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [detail, setDetail] = useState<Contact | undefined>();
 
   const companyNameById = useMemo(() => new Map(companies.map((c) => [c.id, c.name])), [companies]);
 
@@ -64,8 +66,8 @@ export function ContactsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <Input placeholder={t('contacts.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Input placeholder={t('contacts.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} className="w-full sm:max-w-xs" />
         <Button onClick={openCreate}>
           <Plus className="size-4" /> {t('contacts.new')}
         </Button>
@@ -111,8 +113,8 @@ export function ContactsPage() {
             </TableHeader>
             <TableBody>
               {filtered.map((contact) => (
-                <TableRow key={contact.id}>
-                  <TableCell>
+                <TableRow key={contact.id} className="cursor-pointer" onClick={() => setDetail(contact)}>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.selected.has(contact.id)}
                       onCheckedChange={() => selection.toggle(contact.id)}
@@ -126,7 +128,7 @@ export function ContactsPage() {
                   <TableCell className="max-w-48 text-muted-foreground">
                     <TruncateTooltip>{contact.companyId ? companyNameById.get(contact.companyId) ?? '—' : '—'}</TruncateTooltip>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-3 text-muted-foreground">
                       {contact.email && (
                         <a href={`mailto:${contact.email}`} className="flex items-center gap-1 hover:text-foreground">
@@ -141,7 +143,7 @@ export function ContactsPage() {
                       {!contact.email && !contact.telegram && '—'}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8" />}>
                         <MoreHorizontal className="size-4" />
@@ -165,6 +167,19 @@ export function ContactsPage() {
 
       <ContactFormDialog open={formOpen} onOpenChange={setFormOpen} contact={editing} />
 
+      <ContactDetailSheet
+        open={!!detail}
+        onOpenChange={(open) => !open && setDetail(undefined)}
+        contact={detail}
+        onEdit={() => {
+          if (detail) openEdit(detail);
+          setDetail(undefined);
+        }}
+        onDelete={() => {
+          if (detail) setDeletingId(detail.id);
+        }}
+      />
+
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
@@ -172,6 +187,7 @@ export function ContactsPage() {
         onConfirm={() => {
           if (deletingId) deleteContact.mutate(deletingId);
           setDeletingId(null);
+          setDetail(undefined);
         }}
       />
 

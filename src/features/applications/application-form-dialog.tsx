@@ -243,7 +243,7 @@ export function ApplicationFormDialog({
 
           <div className="grid gap-6 py-4">
             <section className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label>{t('applicationForm.companyLabel')}</Label>
                   <div className="flex gap-1.5">
@@ -289,7 +289,7 @@ export function ApplicationFormDialog({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="grid gap-2">
                   <Label>{t('applicationForm.statusLabel')}</Label>
                   <Select value={values.status} onValueChange={(v) => set('status', v)}>
@@ -328,7 +328,7 @@ export function ApplicationFormDialog({
               )}
             </section>
 
-            <section className="grid grid-cols-2 gap-4">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="vacancyUrl">{t('applicationForm.vacancyUrl')}</Label>
                 <Input id="vacancyUrl" value={values.vacancyUrl} onChange={(e) => set('vacancyUrl', e.target.value)} placeholder="https://..." />
@@ -339,7 +339,7 @@ export function ApplicationFormDialog({
               </div>
             </section>
 
-            <section className="grid grid-cols-2 gap-4">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="dateFound">{t('applicationForm.dateFound')}</Label>
                 <Input id="dateFound" type="date" value={values.dateFound} onChange={(e) => set('dateFound', e.target.value)} />
@@ -358,7 +358,7 @@ export function ApplicationFormDialog({
               </div>
             </section>
 
-            <section className="grid grid-cols-4 gap-4">
+            <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div className="grid gap-2">
                 <Label htmlFor="salaryMin">{t('applicationForm.salaryMin')}</Label>
                 <Input id="salaryMin" type="number" value={values.salaryMin} onChange={(e) => set('salaryMin', e.target.value)} />
@@ -387,7 +387,7 @@ export function ApplicationFormDialog({
               </div>
             </section>
 
-            <section className="grid grid-cols-2 gap-4">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label>{t('applicationForm.employmentType')}</Label>
                 <Select value={values.employmentType} onValueChange={(v) => set('employmentType', v)}>
@@ -403,7 +403,7 @@ export function ApplicationFormDialog({
               </div>
             </section>
 
-            <section className="grid grid-cols-2 gap-4">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label>{t('applicationForm.recruiterContact')}</Label>
                 <Select items={recruiterItems} value={values.recruiterId} onValueChange={(v) => set('recruiterId', v)}>

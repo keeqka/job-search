@@ -156,7 +156,7 @@ export function ContactFormDialog({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="name">{t('companyForm.nameLabel')}</Label>
                 <Input
@@ -193,7 +193,7 @@ export function ContactFormDialog({
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="email">{t('contactForm.email')}</Label>
                 <Input id="email" type="email" value={values.email} onChange={(e) => set('email', e.target.value)} />
@@ -204,7 +204,7 @@ export function ContactFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="telegram">{t('contactForm.telegram')}</Label>
                 <Input id="telegram" value={values.telegram} onChange={(e) => set('telegram', e.target.value)} placeholder="@username" />
@@ -215,7 +215,7 @@ export function ContactFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
                 <Label htmlFor="firstContact">{t('contactForm.firstContact')}</Label>
                 <Input id="firstContact" type="date" value={values.firstContact} onChange={(e) => set('firstContact', e.target.value)} />

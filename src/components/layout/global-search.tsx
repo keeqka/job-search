@@ -43,7 +43,16 @@ export function GlobalSearch() {
     <>
       <Button
         variant="outline"
-        className="w-56 justify-start text-muted-foreground sm:w-72"
+        size="icon"
+        className="shrink-0 sm:hidden"
+        onClick={() => setOpen(true)}
+        aria-label={t('search.trigger')}
+      >
+        <Search className="size-4" />
+      </Button>
+      <Button
+        variant="outline"
+        className="hidden w-56 justify-start text-muted-foreground sm:flex sm:w-72"
         onClick={() => setOpen(true)}
       >
         <Search className="size-4" />

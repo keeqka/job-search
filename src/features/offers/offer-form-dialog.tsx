@@ -187,7 +187,7 @@ export function OfferFormDialog({
               <FieldError message={errors.applicationId} />
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div className="grid gap-2">
                 <Label htmlFor="baseSalary">{t('offers.baseSalary')}</Label>
                 <Input id="baseSalary" type="number" value={values.baseSalary} onChange={(e) => set('baseSalary', e.target.value)} />
@@ -217,7 +217,7 @@ export function OfferFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
                 <Label htmlFor="equity">{t('offerForm.equity')}</Label>
                 <Input id="equity" value={values.equity} onChange={(e) => set('equity', e.target.value)} />
@@ -237,7 +237,7 @@ export function OfferFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="probation">{t('offerForm.probation')}</Label>
                 <Input id="probation" value={values.probation} onChange={(e) => set('probation', e.target.value)} placeholder={t('offerForm.probationPlaceholder')} />
@@ -248,7 +248,7 @@ export function OfferFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
                 <Label htmlFor="offerDate">{t('offers.offerDate')}</Label>
                 <Input id="offerDate" type="date" value={values.offerDate} onChange={(e) => set('offerDate', e.target.value)} />

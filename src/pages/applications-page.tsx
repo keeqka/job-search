@@ -184,7 +184,7 @@ export function ApplicationsPage() {
           placeholder={t('applications.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-64"
+          className="w-full sm:w-64"
         />
         <MultiSelectFilter label={t('applications.statusLabel')} options={APPLICATION_STATUSES} selected={statusFilter} onChange={setStatusFilter} renderLabel={(v) => enumLabel('applicationStatus', v)} />
         <MultiSelectFilter label={t('applications.sourceLabel')} options={SOURCES} selected={sourceFilter} onChange={setSourceFilter} renderLabel={(v) => enumLabel('source', v)} />
@@ -197,7 +197,7 @@ export function ApplicationsPage() {
           value={companyFilter}
           onValueChange={(v) => setCompanyFilter(v ?? 'all')}
         >
-          <SelectTrigger className="w-48"><SelectValue placeholder={t('applications.companyPlaceholder')} /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder={t('applications.companyPlaceholder')} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('applications.allCompanies')}</SelectItem>
             {companies.map((c) => (
@@ -212,10 +212,10 @@ export function ApplicationsPage() {
           placeholder={t('applications.minSalary')}
           value={salaryMin}
           onChange={(e) => setSalaryMin(e.target.value)}
-          className="w-28"
+          className="w-full sm:w-28"
         />
-        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-36" title={t('applications.appliedFrom')} />
-        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-36" title={t('applications.appliedTo')} />
+        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full sm:w-36" title={t('applications.appliedFrom')} />
+        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full sm:w-36" title={t('applications.appliedTo')} />
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             <X className="size-3.5" /> {t('common.clear')}

@@ -184,7 +184,7 @@ export function InterviewFormDialog({
               <FieldError message={errors.applicationId} />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
                 <Label>{t('interviewForm.typeLabel')}</Label>
                 <Select value={values.type} onValueChange={(v) => set('type', v)}>
@@ -242,7 +242,7 @@ export function InterviewFormDialog({
               <Label htmlFor="myAnswers">{t('interviewForm.myAnswers')}</Label>
               <Textarea id="myAnswers" rows={3} value={values.myAnswers} onChange={(e) => set('myAnswers', e.target.value)} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="whatWentWell">{t('interviewForm.whatWentWell')}</Label>
                 <Textarea id="whatWentWell" rows={2} value={values.whatWentWell} onChange={(e) => set('whatWentWell', e.target.value)} />

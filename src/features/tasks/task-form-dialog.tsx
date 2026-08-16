@@ -163,7 +163,7 @@ export function TaskFormDialog({
               </Select>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
                 <Label htmlFor="dueDate">{t('taskForm.dueDate')}</Label>
                 <Input id="dueDate" type="date" value={values.dueDate} onChange={(e) => set('dueDate', e.target.value)} />

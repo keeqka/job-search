@@ -96,14 +96,14 @@ export function ApplicationDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={() => navigate(-1)}>
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold">{application.position}</h2>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-semibold break-words">{application.position}</h2>
               <StatusBadge status={application.status} />
               <PriorityBadge priority={application.priority} />
             </div>
@@ -119,12 +119,12 @@ export function ApplicationDetailPage() {
             )}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <Button variant="outline" onClick={() => setEditOpen(true)}>
-            <Pencil className="size-4" /> {t('common.edit')}
+            <Pencil className="size-4" /> <span className="hidden sm:inline">{t('common.edit')}</span>
           </Button>
           <Button variant="outline" className="text-destructive" onClick={() => setDeleteOpen(true)}>
-            <Trash2 className="size-4" /> {t('common.delete')}
+            <Trash2 className="size-4" /> <span className="hidden sm:inline">{t('common.delete')}</span>
           </Button>
         </div>
       </div>

@@ -151,7 +151,7 @@ export function CompanyFormDialog({
               <FieldError message={errors.name} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="website">{t('common.website')}</Label>
                 <Input id="website" value={values.website} onChange={(e) => set('website', e.target.value)} placeholder="https://..." />
@@ -162,7 +162,7 @@ export function CompanyFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label>{t('applicationDetail.industry')}</Label>
                 <Select value={values.industry} onValueChange={(v) => set('industry', v)}>
@@ -183,7 +183,7 @@ export function CompanyFormDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="location">{t('applicationForm.location')}</Label>
                 <Input id="location" value={values.location} onChange={(e) => set('location', e.target.value)} />

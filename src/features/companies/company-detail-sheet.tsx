@@ -85,7 +85,7 @@ export function CompanyDetailSheet({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
             <Field label={t('applicationDetail.industry')} value={enumLabel('industry', company.industry)} />
             <Field label={t('companyDetail.companySize')} value={enumLabel('companySize', company.companySize)} />
             <Field label={t('applicationForm.location')} value={company.location} />
