@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { MoreHorizontal, Pencil, Plus, Trash2, Users, Mail, Send } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,10 +21,13 @@ import { useContacts, useDeleteContact, useBulkDeleteContacts } from '@/features
 import { useCompanies } from '@/features/companies/hooks';
 import { useSelection } from '@/hooks/useSelection';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import type { Contact } from '@/types';
 
 export function ContactsPage() {
-  usePageTitle('Contacts');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.contacts'));
   const { data: contacts, isLoading, isError, refetch } = useContacts();
   const { data: companies = [] } = useCompanies();
   const deleteContact = useDeleteContact();
@@ -61,9 +65,9 @@ export function ContactsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <Input placeholder="Search contacts..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <Input placeholder={t('contacts.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
         <Button onClick={openCreate}>
-          <Plus className="size-4" /> New contact
+          <Plus className="size-4" /> {t('contacts.new')}
         </Button>
       </div>
 
@@ -75,14 +79,14 @@ export function ContactsPage() {
       />
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load contacts." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('contacts.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && filtered.length === 0 && (
         <EmptyState
           icon={Users}
-          title={contacts?.length ? 'No contacts match your search' : 'No contacts yet'}
-          description={contacts?.length ? undefined : 'Add recruiters and hiring managers you are in touch with.'}
-          action={!contacts?.length ? <Button onClick={openCreate}>Add your first contact</Button> : undefined}
+          title={contacts?.length ? t('contacts.noMatch') : t('contacts.noContactsYet')}
+          description={contacts?.length ? undefined : t('contacts.addFirstDescription')}
+          action={!contacts?.length ? <Button onClick={openCreate}>{t('contacts.addFirst')}</Button> : undefined}
         />
       )}
 
@@ -95,13 +99,13 @@ export function ContactsPage() {
                   <Checkbox
                     checked={selection.isAllSelected(filteredIds)}
                     onCheckedChange={() => selection.toggleAll(filteredIds)}
-                    aria-label="Select all"
+                    aria-label={t('applications.selectAll')}
                   />
                 </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Contact</TableHead>
+                <TableHead>{t('applicationDetail.name')}</TableHead>
+                <TableHead>{t('applicationDetail.role')}</TableHead>
+                <TableHead>{t('common.company')}</TableHead>
+                <TableHead>{t('applicationDetail.contact')}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -112,13 +116,13 @@ export function ContactsPage() {
                     <Checkbox
                       checked={selection.selected.has(contact.id)}
                       onCheckedChange={() => selection.toggle(contact.id)}
-                      aria-label={`Select ${contact.name}`}
+                      aria-label={t('contacts.selectRow', { name: contact.name })}
                     />
                   </TableCell>
                   <TableCell className="max-w-48 font-medium">
                     <TruncateTooltip>{contact.name}</TruncateTooltip>
                   </TableCell>
-                  <TableCell>{contact.role ? <Badge variant="secondary">{contact.role}</Badge> : '—'}</TableCell>
+                  <TableCell>{contact.role ? <Badge variant="secondary">{enumLabel('contactRole', contact.role)}</Badge> : '—'}</TableCell>
                   <TableCell className="max-w-48 text-muted-foreground">
                     <TruncateTooltip>{contact.companyId ? companyNameById.get(contact.companyId) ?? '—' : '—'}</TruncateTooltip>
                   </TableCell>
@@ -144,10 +148,10 @@ export function ContactsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => openEdit(contact)}>
-                          <Pencil className="size-4" /> Edit
+                          <Pencil className="size-4" /> {t('common.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem variant="destructive" onClick={() => setDeletingId(contact.id)}>
-                          <Trash2 className="size-4" /> Delete
+                          <Trash2 className="size-4" /> {t('common.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -164,7 +168,7 @@ export function ContactsPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this contact?"
+        title={t('contacts.deleteTitle')}
         onConfirm={() => {
           if (deletingId) deleteContact.mutate(deletingId);
           setDeletingId(null);
@@ -174,7 +178,7 @@ export function ContactsPage() {
       <ConfirmDeleteDialog
         open={bulkDeleteOpen}
         onOpenChange={setBulkDeleteOpen}
-        title={`Delete ${selection.count} ${selection.count === 1 ? 'contact' : 'contacts'}?`}
+        title={t('contacts.bulkDeleteTitle', { count: selection.count })}
         onConfirm={() => {
           bulkDeleteContacts.mutate([...selection.selected], { onSuccess: selection.clear });
           setBulkDeleteOpen(false);

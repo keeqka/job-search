@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExternalLink, FileText, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,8 @@ import { TruncateTooltip } from '@/components/truncate-tooltip';
 import type { CvVersion } from '@/types';
 
 export function CvVersionsPage() {
-  usePageTitle('CV Versions');
+  const { t } = useTranslation();
+  usePageTitle(t('nav.cvVersions'));
   const { data: cvVersions, isLoading, isError, refetch } = useCvVersions();
   const deleteCv = useDeleteCvVersion();
 
@@ -39,19 +41,19 @@ export function CvVersionsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-end">
         <Button onClick={openCreate}>
-          <Plus className="size-4" /> New version
+          <Plus className="size-4" /> {t('cvVersions.new')}
         </Button>
       </div>
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load CV versions." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('cvVersions.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && !cvVersions?.length && (
         <EmptyState
           icon={FileText}
-          title="No CV versions yet"
-          description="Track the different resume variants you use for different roles."
-          action={<Button onClick={openCreate}>Add your first CV version</Button>}
+          title={t('cvVersions.noVersionsYet')}
+          description={t('cvVersions.emptyDescription')}
+          action={<Button onClick={openCreate}>{t('cvVersions.addFirst')}</Button>}
         />
       )}
 
@@ -69,21 +71,21 @@ export function CvVersionsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => openEdit(cv)}>
-                      <Pencil className="size-4" /> Edit
+                      <Pencil className="size-4" /> {t('common.edit')}
                     </DropdownMenuItem>
                     <DropdownMenuItem variant="destructive" onClick={() => setDeletingId(cv.id)}>
-                      <Trash2 className="size-4" /> Delete
+                      <Trash2 className="size-4" /> {t('common.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                {cv.targetRole && <p className="text-muted-foreground">Target: {cv.targetRole}</p>}
-                <p className="text-muted-foreground">Created {formatDate(cv.createdDate)}</p>
+                {cv.targetRole && <p className="text-muted-foreground">{t('cvVersions.target', { role: cv.targetRole })}</p>}
+                <p className="text-muted-foreground">{t('cvVersions.created', { date: formatDate(cv.createdDate) })}</p>
                 {cv.description && <p className="whitespace-pre-wrap">{cv.description}</p>}
                 {cv.fileUrl && (
                   <a href={cv.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                    <ExternalLink className="size-3.5" /> Open file
+                    <ExternalLink className="size-3.5" /> {t('cvVersions.openFile')}
                   </a>
                 )}
               </CardContent>
@@ -97,7 +99,7 @@ export function CvVersionsPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this CV version?"
+        title={t('cvVersions.deleteTitle')}
         onConfirm={() => {
           if (deletingId) deleteCv.mutate(deletingId);
           setDeletingId(null);

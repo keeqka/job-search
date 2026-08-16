@@ -11,12 +11,14 @@ import {
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { KANBAN_STATUSES, TERMINAL_STATUSES, type Application, type ApplicationStatus } from '@/types';
 import { PriorityBadge } from '@/features/applications/status-badge';
 import { formatDate, formatSalaryRange } from '@/lib/utils/computed';
 import { useUpdateApplicationStatus } from '@/features/applications/hooks';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface KanbanCardData {
   application: Application;
@@ -69,10 +71,11 @@ function KanbanColumn({
   onOpen: (id: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
+  const enumLabel = useEnumLabel();
   return (
     <div className="flex w-72 shrink-0 flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
-        <span className="text-sm font-medium">{status}</span>
+        <span className="text-sm font-medium">{enumLabel('applicationStatus', status)}</span>
         <span className="text-xs text-muted-foreground">{cards.length}</span>
       </div>
       <div
@@ -99,6 +102,7 @@ export function KanbanBoard({
   companyNameById: Map<string, string>;
   onOpen: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const updateStatus = useUpdateApplicationStatus();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showTerminal, setShowTerminal] = useState(false);
@@ -108,16 +112,16 @@ export function KanbanBoard({
     const map = new Map<ApplicationStatus, KanbanCardData[]>();
     for (const status of [...KANBAN_STATUSES, ...TERMINAL_STATUSES]) map.set(status, []);
     for (const app of applications) {
-      const entry: KanbanCardData = { application: app, companyName: companyNameById.get(app.companyId) ?? 'Unknown' };
+      const entry: KanbanCardData = { application: app, companyName: companyNameById.get(app.companyId) ?? t('common.unknown') };
       map.get(app.status)?.push(entry);
     }
     return map;
-  }, [applications, companyNameById]);
+  }, [applications, companyNameById, t]);
 
   const activeCard = activeId
     ? applications
         .filter((a) => a.id === activeId)
-        .map((a) => ({ application: a, companyName: companyNameById.get(a.companyId) ?? 'Unknown' }))[0]
+        .map((a) => ({ application: a, companyName: companyNameById.get(a.companyId) ?? t('common.unknown') }))[0]
     : undefined;
 
   function handleDragStart(event: DragStartEvent) {
@@ -151,7 +155,7 @@ export function KanbanBoard({
             onClick={() => setShowTerminal((v) => !v)}
           >
             {showTerminal ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-            Closed applications ({terminalCount})
+            {t('applications.closedApplications', { count: terminalCount })}
           </button>
           {showTerminal && (
             <div className="flex gap-4 overflow-x-auto pb-4">

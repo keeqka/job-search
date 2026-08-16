@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ import { useApplications } from '@/features/applications/hooks';
 import { useCompanies } from '@/features/companies/hooks';
 import { applicationLabel } from '@/features/applications/application-label';
 import { useCreateTask, useUpdateTask } from '@/features/tasks/hooks';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
   applicationId: string;
@@ -68,6 +70,8 @@ export function TaskFormDialog({
   task?: Task;
   defaultApplicationId?: string;
 }) {
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
   const isEdit = !!task;
   const [values, setValues] = useState<FormValues>(() => toFormValues(task));
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -96,8 +100,8 @@ export function TaskFormDialog({
 
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof FormValues, string>> = {};
-    if (!values.type) nextErrors.type = 'Type is required';
-    if (!values.status) nextErrors.status = 'Status is required';
+    if (!values.type) nextErrors.type = t('taskForm.typeRequiredError');
+    if (!values.status) nextErrors.status = t('taskForm.statusRequiredError');
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -128,24 +132,24 @@ export function TaskFormDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEdit ? 'Edit task' : 'New task'}</DialogTitle>
-            <DialogDescription>Keep track of what needs to happen next.</DialogDescription>
+            <DialogTitle>{isEdit ? t('taskForm.editTitle') : t('taskForm.newTitle')}</DialogTitle>
+            <DialogDescription>{t('taskForm.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Type *</Label>
+              <Label>{t('taskForm.typeLabel')}</Label>
               <Select value={values.type} onValueChange={(v) => set('type', v)}>
-                <SelectTrigger aria-invalid={!!errors.type}><SelectValue placeholder="Select type" /></SelectTrigger>
+                <SelectTrigger aria-invalid={!!errors.type}><SelectValue placeholder={t('interviewForm.selectType')} /></SelectTrigger>
                 <SelectContent>
-                  {TASK_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {TASK_TYPES.map((tt) => <SelectItem key={tt} value={tt}>{enumLabel('taskType', tt)}</SelectItem>)}
                 </SelectContent>
               </Select>
               <FieldError message={errors.type} />
             </div>
 
             <div className="grid gap-2">
-              <Label>Application</Label>
+              <Label>{t('common.application')}</Label>
               <Select items={applicationItems} value={values.applicationId} onValueChange={(v) => set('applicationId', v)}>
                 <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
@@ -160,38 +164,38 @@ export function TaskFormDialog({
 
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="dueDate">Due date</Label>
+                <Label htmlFor="dueDate">{t('taskForm.dueDate')}</Label>
                 <Input id="dueDate" type="date" value={values.dueDate} onChange={(e) => set('dueDate', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>Priority</Label>
+                <Label>{t('applications.priorityLabel')}</Label>
                 <Select value={values.priority} onValueChange={(v) => set('priority', v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {PRIORITIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    {PRIORITIES.map((p) => <SelectItem key={p} value={p}>{enumLabel('priority', p)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Status *</Label>
+                <Label>{t('taskForm.statusLabel')}</Label>
                 <Select value={values.status} onValueChange={(v) => set('status', v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {TASK_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {TASK_STATUSES.map((s) => <SelectItem key={s} value={s}>{enumLabel('taskStatus', s)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('common.notes')}</Label>
               <Textarea id="notes" rows={3} value={values.notes} onChange={(e) => set('notes', e.target.value)} />
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <SubmitButton pending={pending}>{isEdit ? 'Save changes' : 'Create task'}</SubmitButton>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
+            <SubmitButton pending={pending}>{isEdit ? t('common.saveChanges') : t('taskForm.createTask')}</SubmitButton>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Handshake, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ import { useCompanies } from '@/features/companies/hooks';
 import { OfferFormDialog } from '@/features/offers/offer-form-dialog';
 import { useSelection } from '@/hooks/useSelection';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import type { Offer } from '@/types';
 
 const DECISION_STYLES: Record<Offer['decision'], string> = {
@@ -32,7 +34,9 @@ const DECISION_STYLES: Record<Offer['decision'], string> = {
 };
 
 export function OffersPage() {
-  usePageTitle('Offers');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.offers'));
   const { data: offers, isLoading, isError, refetch } = useOffers();
   const { data: applications = [] } = useApplications();
   const { data: companies = [] } = useCompanies();
@@ -51,8 +55,8 @@ export function OffersPage() {
 
   function contextFor(offer: Offer) {
     const app = applicationById.get(offer.applicationId);
-    if (!app) return { position: 'Unknown', company: 'Unknown' };
-    return { position: app.position, company: companyById.get(app.companyId)?.name ?? 'Unknown' };
+    if (!app) return { position: t('common.unknown'), company: t('common.unknown') };
+    return { position: app.position, company: companyById.get(app.companyId)?.name ?? t('common.unknown') };
   }
 
   function openCreate() {
@@ -68,7 +72,7 @@ export function OffersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-end">
         <Button onClick={openCreate}>
-          <Plus className="size-4" /> New offer
+          <Plus className="size-4" /> {t('offers.new')}
         </Button>
       </div>
 
@@ -80,14 +84,14 @@ export function OffersPage() {
       />
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load offers." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('offers.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && !offers?.length && (
         <EmptyState
           icon={Handshake}
-          title="No offers yet"
-          description="Once you get an offer, log the terms here to compare and decide."
-          action={<Button onClick={openCreate}>Add your first offer</Button>}
+          title={t('offers.noOffersYet')}
+          description={t('offers.emptyDescription')}
+          action={<Button onClick={openCreate}>{t('offers.addFirst')}</Button>}
         />
       )}
 
@@ -100,14 +104,14 @@ export function OffersPage() {
                   <Checkbox
                     checked={selection.isAllSelected(offerIds)}
                     onCheckedChange={() => selection.toggleAll(offerIds)}
-                    aria-label="Select all"
+                    aria-label={t('applications.selectAll')}
                   />
                 </TableHead>
-                <TableHead>Position</TableHead>
-                <TableHead>Base salary</TableHead>
-                <TableHead>Offer date</TableHead>
-                <TableHead>Deadline</TableHead>
-                <TableHead>Decision</TableHead>
+                <TableHead>{t('common.position')}</TableHead>
+                <TableHead>{t('offers.baseSalary')}</TableHead>
+                <TableHead>{t('offers.offerDate')}</TableHead>
+                <TableHead>{t('offers.deadline')}</TableHead>
+                <TableHead>{t('offers.decisionLabel')}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -120,7 +124,7 @@ export function OffersPage() {
                       <Checkbox
                         checked={selection.selected.has(offer.id)}
                         onCheckedChange={() => selection.toggle(offer.id)}
-                        aria-label={`Select offer for ${position}`}
+                        aria-label={t('offers.selectRow', { position })}
                       />
                     </TableCell>
                     <TableCell className="max-w-56">
@@ -133,7 +137,7 @@ export function OffersPage() {
                     <TableCell className="text-muted-foreground">{formatDate(offer.offerDate)}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(offer.deadline)}</TableCell>
                     <TableCell>
-                      <Badge className={DECISION_STYLES[offer.decision]} variant="secondary">{offer.decision}</Badge>
+                      <Badge className={DECISION_STYLES[offer.decision]} variant="secondary">{enumLabel('offerDecision', offer.decision)}</Badge>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -142,10 +146,10 @@ export function OffersPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(offer)}>
-                            <Pencil className="size-4" /> Edit
+                            <Pencil className="size-4" /> {t('common.edit')}
                           </DropdownMenuItem>
                           <DropdownMenuItem variant="destructive" onClick={() => setDeletingId(offer.id)}>
-                            <Trash2 className="size-4" /> Delete
+                            <Trash2 className="size-4" /> {t('common.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -163,7 +167,7 @@ export function OffersPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this offer?"
+        title={t('offers.deleteTitle')}
         onConfirm={() => {
           if (deletingId) deleteOffer.mutate(deletingId);
           setDeletingId(null);
@@ -173,7 +177,7 @@ export function OffersPage() {
       <ConfirmDeleteDialog
         open={bulkDeleteOpen}
         onOpenChange={setBulkDeleteOpen}
-        title={`Delete ${selection.count} ${selection.count === 1 ? 'offer' : 'offers'}?`}
+        title={t('offers.bulkDeleteTitle', { count: selection.count })}
         onConfirm={() => {
           bulkDeleteOffers.mutate([...selection.selected], { onSuccess: selection.clear });
           setBulkDeleteOpen(false);

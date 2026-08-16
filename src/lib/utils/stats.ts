@@ -114,11 +114,11 @@ export function avgDaysToResponse(apps: Application[]): number | null {
   return Math.round((days.reduce((a, b) => a + b, 0) / days.length) * 10) / 10;
 }
 
-export function rejectionsByReason(apps: Application[]): { reason: string; count: number }[] {
+export function rejectionsByReason(apps: Application[], notSpecifiedLabel = 'Not specified'): { reason: string; count: number }[] {
   const counts = new Map<string, number>();
   for (const app of apps) {
     if (app.status !== 'Rejected') continue;
-    const reason = app.rejectionReason?.trim() || 'Not specified';
+    const reason = app.rejectionReason?.trim() || notSpecifiedLabel;
     counts.set(reason, (counts.get(reason) ?? 0) + 1);
   }
   return [...counts.entries()].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);

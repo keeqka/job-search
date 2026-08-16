@@ -8,6 +8,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { Briefcase, Plus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,9 +38,12 @@ import { buildColumns, type ApplicationRow } from '@/features/applications/colum
 import { ApplicationFormDialog } from '@/features/applications/application-form-dialog';
 import { KanbanBoard } from '@/features/applications/kanban-board';
 import { useSelection } from '@/hooks/useSelection';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 export function ApplicationsPage() {
-  usePageTitle('Applications');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.applications'));
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,8 +90,8 @@ export function ApplicationsPage() {
   const companyNameById = useMemo(() => new Map(companies.map((c) => [c.id, c.name])), [companies]);
 
   const rows: ApplicationRow[] = useMemo(
-    () => (applications ?? []).map((a) => ({ ...a, companyName: companyNameById.get(a.companyId) ?? 'Unknown' })),
-    [applications, companyNameById],
+    () => (applications ?? []).map((a) => ({ ...a, companyName: companyNameById.get(a.companyId) ?? t('common.unknown') })),
+    [applications, companyNameById, t],
   );
 
   const filtered = useMemo(() => {
@@ -127,9 +131,9 @@ export function ApplicationsPage() {
   }
 
   const columns = useMemo(
-    () => buildColumns({ onEdit: openEdit, onDelete: setDeletingId, onOpen: openDetail, selection }),
+    () => buildColumns({ onEdit: openEdit, onDelete: setDeletingId, onOpen: openDetail, selection, t, enumLabel }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selection.selected],
+    [selection.selected, t],
   );
 
   const table = useReactTable({
@@ -165,37 +169,37 @@ export function ApplicationsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={view} onValueChange={(v) => setView(v as 'table' | 'kanban')}>
           <TabsList>
-            <TabsTrigger value="table">Table</TabsTrigger>
-            <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            <TabsTrigger value="table">{t('applications.table')}</TabsTrigger>
+            <TabsTrigger value="kanban">{t('applications.kanban')}</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button onClick={openCreate}>
           <Plus className="size-4" />
-          New application
+          {t('applications.new')}
         </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
-          placeholder="Search company, position, notes..."
+          placeholder={t('applications.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-64"
         />
-        <MultiSelectFilter label="Status" options={APPLICATION_STATUSES} selected={statusFilter} onChange={setStatusFilter} />
-        <MultiSelectFilter label="Source" options={SOURCES} selected={sourceFilter} onChange={setSourceFilter} />
-        <MultiSelectFilter label="Priority" options={PRIORITIES} selected={priorityFilter} onChange={setPriorityFilter} />
+        <MultiSelectFilter label={t('applications.statusLabel')} options={APPLICATION_STATUSES} selected={statusFilter} onChange={setStatusFilter} renderLabel={(v) => enumLabel('applicationStatus', v)} />
+        <MultiSelectFilter label={t('applications.sourceLabel')} options={SOURCES} selected={sourceFilter} onChange={setSourceFilter} renderLabel={(v) => enumLabel('source', v)} />
+        <MultiSelectFilter label={t('applications.priorityLabel')} options={PRIORITIES} selected={priorityFilter} onChange={setPriorityFilter} renderLabel={(v) => enumLabel('priority', v)} />
         <Select
           items={{
-            all: 'All companies',
+            all: t('applications.allCompanies'),
             ...Object.fromEntries(companies.map((c) => [c.id, <TruncateTooltip key={c.id}>{c.name}</TruncateTooltip>])),
           }}
           value={companyFilter}
           onValueChange={(v) => setCompanyFilter(v ?? 'all')}
         >
-          <SelectTrigger className="w-48"><SelectValue placeholder="Company" /></SelectTrigger>
+          <SelectTrigger className="w-48"><SelectValue placeholder={t('applications.companyPlaceholder')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All companies</SelectItem>
+            <SelectItem value="all">{t('applications.allCompanies')}</SelectItem>
             {companies.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 <TruncateTooltip>{c.name}</TruncateTooltip>
@@ -205,16 +209,16 @@ export function ApplicationsPage() {
         </Select>
         <Input
           type="number"
-          placeholder="Min salary"
+          placeholder={t('applications.minSalary')}
           value={salaryMin}
           onChange={(e) => setSalaryMin(e.target.value)}
           className="w-28"
         />
-        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-36" title="Applied from" />
-        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-36" title="Applied to" />
+        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-36" title={t('applications.appliedFrom')} />
+        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-36" title={t('applications.appliedTo')} />
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
-            <X className="size-3.5" /> Clear
+            <X className="size-3.5" /> {t('common.clear')}
           </Button>
         )}
       </div>
@@ -241,24 +245,24 @@ export function ApplicationsPage() {
               disabled={bulkUpdateApplications.isPending}
               className="rounded-full border-transparent bg-transparent hover:bg-accent"
             >
-              <SelectValue placeholder="Change status..." />
+              <SelectValue placeholder={t('applications.changeStatus')} />
             </SelectTrigger>
             <SelectContent>
-              {APPLICATION_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {APPLICATION_STATUSES.map((s) => <SelectItem key={s} value={s}>{enumLabel('applicationStatus', s)}</SelectItem>)}
             </SelectContent>
           </Select>
         </BulkActionsBar>
       )}
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load applications." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('applications.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && filtered.length === 0 && (
         <EmptyState
           icon={Briefcase}
-          title={rows.length ? 'No applications match your filters' : 'No applications yet'}
-          description={rows.length ? undefined : 'Add your first application to start tracking your job search.'}
-          action={!rows.length ? <Button onClick={openCreate}>Add your first application</Button> : undefined}
+          title={rows.length ? t('applications.noMatchFilters') : t('applications.noApplicationsYet')}
+          description={rows.length ? undefined : t('applications.addFirstDescription')}
+          action={!rows.length ? <Button onClick={openCreate}>{t('applications.addFirst')}</Button> : undefined}
         />
       )}
 
@@ -311,8 +315,8 @@ export function ApplicationsPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this application?"
-        description="Its interviews, offers and tasks will keep their link to this application ID."
+        title={t('applications.deleteTitle')}
+        description={t('applications.deleteDescription')}
         onConfirm={() => {
           if (deletingId) deleteApplication.mutate(deletingId);
           setDeletingId(null);
@@ -322,8 +326,8 @@ export function ApplicationsPage() {
       <ConfirmDeleteDialog
         open={bulkDeleteOpen}
         onOpenChange={setBulkDeleteOpen}
-        title={`Delete ${selection.count} ${selection.count === 1 ? 'application' : 'applications'}?`}
-        description="Their interviews, offers and tasks will keep their link to these application IDs."
+        title={t('applications.bulkDeleteTitle', { count: selection.count })}
+        description={t('applications.bulkDeleteDescription')}
         onConfirm={() => {
           bulkDeleteApplications.mutate([...selection.selected], { onSuccess: selection.clear });
           setBulkDeleteOpen(false);

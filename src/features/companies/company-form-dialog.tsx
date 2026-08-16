@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { COMPANY_SIZES, INDUSTRIES, type Company } from '@/types';
 import { useCreateCompany, useUpdateCompany } from '@/features/companies/hooks';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
   name: string;
@@ -73,6 +75,8 @@ export function CompanyFormDialog({
   company?: Company;
   onSaved?: (company: Company) => void;
 }) {
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
   const isEdit = !!company;
   const [values, setValues] = useState<FormValues>(() => toFormValues(company));
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -94,7 +98,7 @@ export function CompanyFormDialog({
 
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof FormValues, string>> = {};
-    if (!values.name.trim()) nextErrors.name = 'Company name is required';
+    if (!values.name.trim()) nextErrors.name = t('companyForm.nameRequiredError');
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -128,15 +132,15 @@ export function CompanyFormDialog({
       <DialogContent className="sm:max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEdit ? 'Edit company' : 'New company'}</DialogTitle>
+            <DialogTitle>{isEdit ? t('companyForm.editTitle') : t('companyForm.newTitle')}</DialogTitle>
             <DialogDescription>
-              {isEdit ? 'Update company details.' : 'Add a company you are targeting or have applied to.'}
+              {isEdit ? t('companyForm.editDescription') : t('companyForm.newDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">{t('companyForm.nameLabel')}</Label>
               <Input
                 id="name"
                 value={values.name}
@@ -149,31 +153,31 @@ export function CompanyFormDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="website">Website</Label>
+                <Label htmlFor="website">{t('common.website')}</Label>
                 <Input id="website" value={values.website} onChange={(e) => set('website', e.target.value)} placeholder="https://..." />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="linkedin">LinkedIn</Label>
+                <Label htmlFor="linkedin">{t('common.linkedin')}</Label>
                 <Input id="linkedin" value={values.linkedin} onChange={(e) => set('linkedin', e.target.value)} placeholder="https://linkedin.com/company/..." />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Industry</Label>
+                <Label>{t('applicationDetail.industry')}</Label>
                 <Select value={values.industry} onValueChange={(v) => set('industry', v)}>
-                  <SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('companyForm.selectIndustry')} /></SelectTrigger>
                   <SelectContent>
-                    {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                    {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{enumLabel('industry', i)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Company size</Label>
+                <Label>{t('companyDetail.companySize')}</Label>
                 <Select value={values.companySize} onValueChange={(v) => set('companySize', v)}>
-                  <SelectTrigger><SelectValue placeholder="Select size" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('companyForm.selectSize')} /></SelectTrigger>
                   <SelectContent>
-                    {COMPANY_SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {COMPANY_SIZES.map((s) => <SelectItem key={s} value={s}>{enumLabel('companySize', s)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -181,32 +185,32 @@ export function CompanyFormDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{t('applicationForm.location')}</Label>
                 <Input id="location" value={values.location} onChange={(e) => set('location', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="rating">Rating (1-5)</Label>
+                <Label htmlFor="rating">{t('companyForm.rating')}</Label>
                 <Input id="rating" type="number" min={1} max={5} value={values.rating} onChange={(e) => set('rating', e.target.value)} />
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="techStack">Tech stack</Label>
+              <Label htmlFor="techStack">{t('companyDetail.techStack')}</Label>
               <Input id="techStack" value={values.techStack} onChange={(e) => set('techStack', e.target.value)} placeholder="React, Node.js, PostgreSQL..." />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('common.notes')}</Label>
               <Textarea id="notes" rows={3} value={values.notes} onChange={(e) => set('notes', e.target.value)} />
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <SubmitButton pending={pending}>
-              {isEdit ? 'Save changes' : 'Create company'}
+              {isEdit ? t('common.saveChanges') : t('companyForm.createCompany')}
             </SubmitButton>
           </DialogFooter>
         </form>
