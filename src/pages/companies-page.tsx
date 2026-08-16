@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ExternalLink, MoreHorizontal, Pencil, Plus, Trash2, Building2, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,10 +21,13 @@ import { CompanyDetailSheet } from '@/features/companies/company-detail-sheet';
 import { useCompanies, useDeleteCompany, useBulkDeleteCompanies } from '@/features/companies/hooks';
 import { useSelection } from '@/hooks/useSelection';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import type { Company } from '@/types';
 
 export function CompaniesPage() {
-  usePageTitle('Companies');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.companies'));
   const { data: companies, isLoading, isError, refetch } = useCompanies();
   const deleteCompany = useDeleteCompany();
   const bulkDeleteCompanies = useBulkDeleteCompanies();
@@ -61,14 +65,14 @@ export function CompaniesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <Input
-          placeholder="Search companies..."
+          placeholder={t('companies.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
         <Button onClick={openCreate}>
           <Plus className="size-4" />
-          New company
+          {t('companies.new')}
         </Button>
       </div>
 
@@ -80,14 +84,14 @@ export function CompaniesPage() {
       />
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load companies." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('companies.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && filtered.length === 0 && (
         <EmptyState
           icon={Building2}
-          title={companies?.length ? 'No companies match your search' : 'No companies yet'}
-          description={companies?.length ? undefined : 'Add the companies you are researching or applying to.'}
-          action={!companies?.length ? <Button onClick={openCreate}>Add your first company</Button> : undefined}
+          title={companies?.length ? t('companies.noMatch') : t('companies.noCompaniesYet')}
+          description={companies?.length ? undefined : t('companies.addFirstDescription')}
+          action={!companies?.length ? <Button onClick={openCreate}>{t('companies.addFirst')}</Button> : undefined}
         />
       )}
 
@@ -100,14 +104,14 @@ export function CompaniesPage() {
                   <Checkbox
                     checked={selection.isAllSelected(filteredIds)}
                     onCheckedChange={() => selection.toggleAll(filteredIds)}
-                    aria-label="Select all"
+                    aria-label={t('applications.selectAll')}
                   />
                 </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Industry</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Rating</TableHead>
+                <TableHead>{t('applicationDetail.name')}</TableHead>
+                <TableHead>{t('applicationDetail.industry')}</TableHead>
+                <TableHead>{t('applicationDetail.size')}</TableHead>
+                <TableHead>{t('applicationForm.location')}</TableHead>
+                <TableHead>{t('companies.rating')}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -122,7 +126,7 @@ export function CompaniesPage() {
                     <Checkbox
                       checked={selection.selected.has(company.id)}
                       onCheckedChange={() => selection.toggle(company.id)}
-                      aria-label={`Select ${company.name}`}
+                      aria-label={t('companies.selectRow', { name: company.name })}
                     />
                   </TableCell>
                   <TableCell className="font-medium">
@@ -141,8 +145,8 @@ export function CompaniesPage() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{company.industry ? <Badge variant="secondary">{company.industry}</Badge> : '—'}</TableCell>
-                  <TableCell className="text-muted-foreground">{company.companySize ?? '—'}</TableCell>
+                  <TableCell>{company.industry ? <Badge variant="secondary">{enumLabel('industry', company.industry)}</Badge> : '—'}</TableCell>
+                  <TableCell className="text-muted-foreground">{company.companySize ? enumLabel('companySize', company.companySize) : '—'}</TableCell>
                   <TableCell className="text-muted-foreground">{company.location ?? '—'}</TableCell>
                   <TableCell>
                     {company.rating ? (
@@ -161,13 +165,13 @@ export function CompaniesPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => openEdit(company)}>
-                          <Pencil className="size-4" /> Edit
+                          <Pencil className="size-4" /> {t('common.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           variant="destructive"
                           onClick={() => setDeletingId(company.id)}
                         >
-                          <Trash2 className="size-4" /> Delete
+                          <Trash2 className="size-4" /> {t('common.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -197,8 +201,8 @@ export function CompaniesPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this company?"
-        description="This won't delete related applications or contacts, but they will lose their company reference."
+        title={t('companies.deleteTitle')}
+        description={t('companies.deleteDescription')}
         onConfirm={() => {
           if (deletingId) deleteCompany.mutate(deletingId);
           setDeletingId(null);
@@ -209,8 +213,8 @@ export function CompaniesPage() {
       <ConfirmDeleteDialog
         open={bulkDeleteOpen}
         onOpenChange={setBulkDeleteOpen}
-        title={`Delete ${selection.count} ${selection.count === 1 ? 'company' : 'companies'}?`}
-        description="This won't delete related applications or contacts, but they will lose their company reference."
+        title={t('companies.bulkDeleteTitle', { count: selection.count })}
+        description={t('companies.deleteDescription')}
         onConfirm={() => {
           bulkDeleteCompanies.mutate([...selection.selected], { onSuccess: selection.clear });
           setBulkDeleteOpen(false);

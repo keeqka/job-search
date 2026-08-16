@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import type { ResourceName } from '@/types';
 
 const API_URL = '/api' + new URL(import.meta.env.VITE_API_URL).pathname;
@@ -16,9 +17,7 @@ type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
 
 function assertConfigured() {
   if (!API_URL) {
-    throw new ApiError(
-      'VITE_API_URL is not configured. Copy .env.example to .env and set your Apps Script Web App URL — see README.md.',
-    );
+    throw new ApiError(i18n.t('apiErrors.notConfigured'));
   }
 }
 
@@ -28,11 +27,11 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(url, init);
   } catch {
-    throw new ApiError('Could not reach the Google Apps Script API. Check VITE_API_URL and your network connection.');
+    throw new ApiError(i18n.t('apiErrors.unreachable'));
   }
   const json = (await res.json()) as ApiResponse<T>;
   if (!json.success) {
-    throw new ApiError(json.error || 'Unknown API error');
+    throw new ApiError(json.error || i18n.t('apiErrors.unknown'));
   }
   return json.data;
 }

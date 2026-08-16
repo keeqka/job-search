@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ import { useCompanies } from '@/features/companies/hooks';
 import { useContacts } from '@/features/contacts/hooks';
 import { contactLabel } from '@/features/contacts/contact-label';
 import { useCreateInterview, useUpdateInterview } from '@/features/interviews/hooks';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
   applicationId: string;
@@ -89,6 +91,8 @@ export function InterviewFormDialog({
   interview?: Interview;
   defaultApplicationId?: string;
 }) {
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
   const isEdit = !!interview;
   const [values, setValues] = useState<FormValues>(() => toFormValues(interview));
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -121,8 +125,8 @@ export function InterviewFormDialog({
 
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof FormValues, string>> = {};
-    if (!values.applicationId) nextErrors.applicationId = 'Application is required';
-    if (!values.type) nextErrors.type = 'Type is required';
+    if (!values.applicationId) nextErrors.applicationId = t('interviewForm.applicationRequiredError');
+    if (!values.type) nextErrors.type = t('interviewForm.typeRequiredError');
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -159,15 +163,15 @@ export function InterviewFormDialog({
       <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEdit ? 'Edit interview' : 'New interview'}</DialogTitle>
-            <DialogDescription>Track interview details, questions and takeaways.</DialogDescription>
+            <DialogTitle>{isEdit ? t('interviewForm.editTitle') : t('interviewForm.newTitle')}</DialogTitle>
+            <DialogDescription>{t('interviewForm.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Application *</Label>
+              <Label>{t('interviewForm.applicationLabel')}</Label>
               <Select items={applicationItems} value={values.applicationId} onValueChange={(v) => set('applicationId', v)}>
-                <SelectTrigger className="w-full" aria-invalid={!!errors.applicationId}><SelectValue placeholder="Select application" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-invalid={!!errors.applicationId}><SelectValue placeholder={t('interviewForm.selectApplication')} /></SelectTrigger>
                 <SelectContent>
                   {applications.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
@@ -181,32 +185,32 @@ export function InterviewFormDialog({
 
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label>Type *</Label>
+                <Label>{t('interviewForm.typeLabel')}</Label>
                 <Select value={values.type} onValueChange={(v) => set('type', v)}>
-                  <SelectTrigger aria-invalid={!!errors.type}><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectTrigger aria-invalid={!!errors.type}><SelectValue placeholder={t('interviewForm.selectType')} /></SelectTrigger>
                   <SelectContent>
-                    {INTERVIEW_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    {INTERVIEW_TYPES.map((it) => <SelectItem key={it} value={it}>{enumLabel('interviewType', it)}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <FieldError message={errors.type} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="date">{t('interviewForm.date')}</Label>
                 <Input id="date" type="date" value={values.date} onChange={(e) => set('date', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>Result *</Label>
+                <Label>{t('interviewForm.resultLabel')}</Label>
                 <Select value={values.result} onValueChange={(v) => set('result', v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {INTERVIEW_RESULTS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    {INTERVIEW_RESULTS.map((r) => <SelectItem key={r} value={r}>{enumLabel('interviewResult', r)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label>Interviewer</Label>
+              <Label>{t('interviewForm.interviewer')}</Label>
               <Select items={contactItems} value={values.interviewerId} onValueChange={(v) => set('interviewerId', v)}>
                 <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
@@ -220,9 +224,9 @@ export function InterviewFormDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label>Weak topics</Label>
+              <Label>{t('interviewForm.weakTopics')}</Label>
               <MultiSelectFilter
-                label="Weak topics"
+                label={t('interviewForm.weakTopics')}
                 options={WEAK_TOPICS}
                 selected={values.weakTopics}
                 onChange={(v) => setValues((prev) => ({ ...prev, weakTopics: v }))}
@@ -230,36 +234,36 @@ export function InterviewFormDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="questions">Questions asked</Label>
+              <Label htmlFor="questions">{t('interviewForm.questionsAsked')}</Label>
               <Textarea id="questions" rows={3} value={values.questions} onChange={(e) => set('questions', e.target.value)} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="myAnswers">My answers</Label>
+              <Label htmlFor="myAnswers">{t('interviewForm.myAnswers')}</Label>
               <Textarea id="myAnswers" rows={3} value={values.myAnswers} onChange={(e) => set('myAnswers', e.target.value)} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="whatWentWell">What went well</Label>
+                <Label htmlFor="whatWentWell">{t('interviewForm.whatWentWell')}</Label>
                 <Textarea id="whatWentWell" rows={2} value={values.whatWentWell} onChange={(e) => set('whatWentWell', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="whatWentBad">What went bad</Label>
+                <Label htmlFor="whatWentBad">{t('interviewForm.whatWentBad')}</Label>
                 <Textarea id="whatWentBad" rows={2} value={values.whatWentBad} onChange={(e) => set('whatWentBad', e.target.value)} />
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="nextStep">Next step</Label>
+              <Label htmlFor="nextStep">{t('interviewForm.nextStep')}</Label>
               <Input id="nextStep" value={values.nextStep} onChange={(e) => set('nextStep', e.target.value)} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('common.notes')}</Label>
               <Textarea id="notes" rows={2} value={values.notes} onChange={(e) => set('notes', e.target.value)} />
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <SubmitButton pending={pending}>{isEdit ? 'Save changes' : 'Create interview'}</SubmitButton>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
+            <SubmitButton pending={pending}>{isEdit ? t('common.saveChanges') : t('interviewForm.createInterview')}</SubmitButton>
           </DialogFooter>
         </form>
       </DialogContent>

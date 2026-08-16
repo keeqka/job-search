@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bar,
   BarChart,
@@ -19,11 +20,14 @@ import { useCvVersions } from '@/features/cv-versions/hooks';
 import { CHART_AXIS, CHART_GRID, chartColor, truncateLabel } from '@/lib/chart-colors';
 import { applicationsPerWeek, avgDaysToResponse, isAppliedOrLater, rejectionsByReason } from '@/lib/utils/stats';
 import { SOURCES } from '@/types';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 const chartMargin = { top: 4, right: 8, left: -20, bottom: 0 };
 
 export function StatisticsPage() {
-  usePageTitle('Statistics');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.statistics'));
   const { data: applications, isLoading, isError, refetch } = useApplications();
   const { data: interviews = [] } = useInterviews();
   const { data: offers = [] } = useOffers();
@@ -69,16 +73,16 @@ export function StatisticsPage() {
   }, [apps, applied, interviews, offers]);
 
   const perWeek = useMemo(() => applicationsPerWeek(apps, 10), [apps]);
-  const rejections = useMemo(() => rejectionsByReason(apps), [apps]);
+  const rejections = useMemo(() => rejectionsByReason(apps, t('statistics.notSpecified')), [apps, t]);
 
   const bySource = useMemo(() => {
     return SOURCES.map((source) => {
       const sourceApplied = applied.filter((a) => a.source === source);
       if (sourceApplied.length === 0) return null;
       const withInterview = sourceApplied.filter((a) => interviews.some((i) => i.applicationId === a.id));
-      return { label: source as string, rate: Math.round((withInterview.length / sourceApplied.length) * 100) };
+      return { label: enumLabel('source', source), rate: Math.round((withInterview.length / sourceApplied.length) * 100) };
     }).filter((v): v is { label: string; rate: number } => v !== null);
-  }, [applied, interviews]);
+  }, [applied, interviews, enumLabel]);
 
   const byCvVersion = useMemo(() => {
     return cvVersions
@@ -92,41 +96,41 @@ export function StatisticsPage() {
   }, [cvVersions, applied, interviews]);
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState message="Failed to load statistics." onRetry={() => refetch()} />;
+  if (isError) return <ErrorState message={t('statistics.failedToLoad')} onRetry={() => refetch()} />;
 
   if (apps.length === 0) {
-    return <EmptyState title="No data yet" description="Statistics will appear once you start tracking applications." />;
+    return <EmptyState title={t('statistics.noDataYet')} description={t('statistics.noDataDescription')} />;
   }
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Total Applications" value={stats.total} />
-        <StatTile label="Response Rate" value={`${stats.responseRate}%`} />
-        <StatTile label="Interview Rate" value={`${stats.interviewRate}%`} />
-        <StatTile label="Technical Interview Rate" value={`${stats.technicalRate}%`} />
-        <StatTile label="Offer Rate" value={`${stats.offerRate}%`} />
-        <StatTile label="Acceptance Rate" value={`${stats.acceptanceRate}%`} />
-        <StatTile label="Avg Days to Response" value={stats.avgDaysToResponse ?? '—'} />
-        <StatTile label="Avg Applications / Week" value={stats.avgPerWeek || '—'} />
+        <StatTile label={t('dashboard.totalApplications')} value={stats.total} />
+        <StatTile label={t('statistics.responseRate')} value={`${stats.responseRate}%`} />
+        <StatTile label={t('statistics.interviewRate')} value={`${stats.interviewRate}%`} />
+        <StatTile label={t('statistics.technicalInterviewRate')} value={`${stats.technicalRate}%`} />
+        <StatTile label={t('statistics.offerRate')} value={`${stats.offerRate}%`} />
+        <StatTile label={t('statistics.acceptanceRate')} value={`${stats.acceptanceRate}%`} />
+        <StatTile label={t('statistics.avgDaysToResponse')} value={stats.avgDaysToResponse ?? '—'} />
+        <StatTile label={t('statistics.avgApplicationsPerWeek')} value={stats.avgPerWeek || '—'} />
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Conversion funnel</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">{t('statistics.conversionFunnel')}</CardTitle></CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-stretch gap-2">
-            <FunnelStep label="Applications" value={stats.totalApplied} />
-            <FunnelStep label="Responses" value={stats.responded} />
-            <FunnelStep label="Interviews" value={stats.interviewed} />
-            <FunnelStep label="Technical" value={stats.technical} />
-            <FunnelStep label="Offers" value={stats.offered} />
+            <FunnelStep label={t('nav.applications')} value={stats.totalApplied} />
+            <FunnelStep label={t('statistics.responses')} value={stats.responded} />
+            <FunnelStep label={t('nav.interviews')} value={stats.interviewed} />
+            <FunnelStep label={t('statistics.technical')} value={stats.technical} />
+            <FunnelStep label={t('nav.offers')} value={stats.offered} />
           </div>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">Applications by week</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('statistics.applicationsByWeek')}</CardTitle></CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={perWeek} margin={chartMargin}>
@@ -134,17 +138,17 @@ export function StatisticsPage() {
                 <XAxis dataKey="week" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip cursor={{ fill: 'var(--muted)' }} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="count" name="Applications" fill={chartColor(0)} radius={[4, 4, 0, 0]} maxBarSize={28} />
+                <Bar dataKey="count" name={t('nav.applications')} fill={chartColor(0)} radius={[4, 4, 0, 0]} maxBarSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Rejections by reason</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('statistics.rejectionsByReason')}</CardTitle></CardHeader>
           <CardContent className="h-64">
             {rejections.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No rejections logged yet.</p>
+              <p className="text-sm text-muted-foreground">{t('statistics.noRejectionsYet')}</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={rejections} layout="vertical" margin={chartMargin}>
@@ -161,7 +165,7 @@ export function StatisticsPage() {
                     tickFormatter={truncateLabel}
                   />
                   <Tooltip cursor={{ fill: 'var(--muted)' }} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                  <Bar dataKey="count" name="Rejections" fill={chartColor(7)} radius={[0, 4, 4, 0]} maxBarSize={20} />
+                  <Bar dataKey="count" name={t('statistics.rejections')} fill={chartColor(7)} radius={[0, 4, 4, 0]} maxBarSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -169,10 +173,10 @@ export function StatisticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Interview conversion by source</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('statistics.conversionBySource')}</CardTitle></CardHeader>
           <CardContent className="h-64">
             {bySource.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Not enough data yet.</p>
+              <p className="text-sm text-muted-foreground">{t('statistics.notEnoughData')}</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bySource} layout="vertical" margin={chartMargin}>
@@ -180,7 +184,7 @@ export function StatisticsPage() {
                   <XAxis type="number" unit="%" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis dataKey="label" type="category" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} width={130} tickFormatter={truncateLabel} />
                   <Tooltip cursor={{ fill: 'var(--muted)' }} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                  <Bar dataKey="rate" name="Interview rate" fill={chartColor(2)} radius={[0, 4, 4, 0]} maxBarSize={20} />
+                  <Bar dataKey="rate" name={t('statistics.interviewRateShort')} fill={chartColor(2)} radius={[0, 4, 4, 0]} maxBarSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -188,10 +192,10 @@ export function StatisticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Interview conversion by CV version</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('statistics.conversionByCvVersion')}</CardTitle></CardHeader>
           <CardContent className="h-64">
             {byCvVersion.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Not enough data yet.</p>
+              <p className="text-sm text-muted-foreground">{t('statistics.notEnoughData')}</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={byCvVersion} layout="vertical" margin={chartMargin}>
@@ -199,7 +203,7 @@ export function StatisticsPage() {
                   <XAxis type="number" unit="%" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis dataKey="label" type="category" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} width={130} tickFormatter={truncateLabel} />
                   <Tooltip cursor={{ fill: 'var(--muted)' }} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                  <Bar dataKey="rate" name="Interview rate" fill={chartColor(3)} radius={[0, 4, 4, 0]} maxBarSize={20} />
+                  <Bar dataKey="rate" name={t('statistics.interviewRateShort')} fill={chartColor(3)} radius={[0, 4, 4, 0]} maxBarSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             )}

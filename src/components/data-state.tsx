@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { AlertCircle, Inbox } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 
@@ -27,13 +28,14 @@ export function LoadingState({ rows = 6 }: { rows?: number }) {
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="animate-in fade-in-0 zoom-in-95 duration-200 flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
       <AlertCircle className="size-8 text-destructive" />
       <p className="text-sm text-muted-foreground max-w-sm">{message}</p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
-          Retry
+          {t('common.retry')}
         </Button>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ListTodo, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,10 +21,13 @@ import { useCompanies } from '@/features/companies/hooks';
 import { TaskFormDialog } from '@/features/tasks/task-form-dialog';
 import { TasksKanbanBoard } from '@/features/tasks/tasks-kanban-board';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import type { Task } from '@/types';
 
 export function TasksPage() {
-  usePageTitle('Tasks');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.tasks'));
   const { data: tasks, isLoading, isError, refetch } = useTasks();
   const { data: applications = [] } = useApplications();
   const { data: companies = [] } = useCompanies();
@@ -43,7 +47,7 @@ export function TasksPage() {
     const app = applicationById.get(task.applicationId);
     if (!app) return null;
     const company = companyById.get(app.companyId);
-    return `${app.position} — ${company?.name ?? 'Unknown'}`;
+    return `${app.position} — ${company?.name ?? t('common.unknown')}`;
   }
 
   const sorted = useMemo(() => {
@@ -71,24 +75,24 @@ export function TasksPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={view} onValueChange={(v) => setView(v as 'table' | 'kanban')}>
           <TabsList>
-            <TabsTrigger value="table">Table</TabsTrigger>
-            <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            <TabsTrigger value="table">{t('applications.table')}</TabsTrigger>
+            <TabsTrigger value="kanban">{t('applications.kanban')}</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button onClick={openCreate}>
-          <Plus className="size-4" /> New task
+          <Plus className="size-4" /> {t('tasks.new')}
         </Button>
       </div>
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load tasks." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('tasks.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && sorted.length === 0 && (
         <EmptyState
           icon={ListTodo}
-          title="No tasks yet"
-          description="Follow-ups, prep work and reminders you create will show up here."
-          action={<Button onClick={openCreate}>Add your first task</Button>}
+          title={t('tasks.noTasksYet')}
+          description={t('tasks.emptyDescription')}
+          action={<Button onClick={openCreate}>{t('tasks.addFirst')}</Button>}
         />
       )}
 
@@ -108,7 +112,7 @@ export function TasksPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={isDone ? 'text-sm line-through text-muted-foreground' : 'text-sm font-medium'}>
-                    {task.type}
+                    {enumLabel('taskType', task.type)}
                   </p>
                   {context && <TruncateTooltip className="text-xs text-muted-foreground">{context}</TruncateTooltip>}
                 </div>
@@ -121,10 +125,10 @@ export function TasksPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEdit(task)}>
-                        <Pencil className="size-4" /> Edit
+                        <Pencil className="size-4" /> {t('common.edit')}
                       </DropdownMenuItem>
                       <DropdownMenuItem variant="destructive" onClick={() => setDeletingId(task.id)}>
-                        <Trash2 className="size-4" /> Delete
+                        <Trash2 className="size-4" /> {t('common.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -144,7 +148,7 @@ export function TasksPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this task?"
+        title={t('tasks.deleteTitle')}
         onConfirm={() => {
           if (deletingId) deleteTask.mutate(deletingId);
           setDeletingId(null);

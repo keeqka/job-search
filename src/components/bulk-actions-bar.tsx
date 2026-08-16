@@ -1,4 +1,5 @@
 import { Loader2, Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +18,7 @@ export function BulkActionsBar({
   deleting?: boolean;
   children?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const visible = count > 0;
 
   return (
@@ -33,15 +35,15 @@ export function BulkActionsBar({
           visible && 'pointer-events-auto',
         )}
       >
-        <span className="mr-2 font-medium whitespace-nowrap">{count} selected</span>
+        <span className="mr-2 font-medium whitespace-nowrap">{t('bulk.selectedCount', { count })}</span>
         {children}
         <Button variant="ghost" size="sm" className="rounded-full" onClick={onDelete} disabled={deleting}>
           {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-          Delete
+          {t('common.delete')}
         </Button>
         <Button size="sm" className="rounded-full" onClick={onClear}>
           <X className="size-4" />
-          Cancel
+          {t('common.cancel')}
         </Button>
       </div>
     </div>

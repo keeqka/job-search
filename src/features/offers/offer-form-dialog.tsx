@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ import { useApplications } from '@/features/applications/hooks';
 import { useCompanies } from '@/features/companies/hooks';
 import { applicationLabel } from '@/features/applications/application-label';
 import { useCreateOffer, useUpdateOffer } from '@/features/offers/hooks';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
   applicationId: string;
@@ -92,6 +94,8 @@ export function OfferFormDialog({
   offer?: Offer;
   defaultApplicationId?: string;
 }) {
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
   const isEdit = !!offer;
   const [values, setValues] = useState<FormValues>(() => toFormValues(offer));
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -120,7 +124,7 @@ export function OfferFormDialog({
 
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof FormValues, string>> = {};
-    if (!values.applicationId) nextErrors.applicationId = 'Application is required';
+    if (!values.applicationId) nextErrors.applicationId = t('offerForm.applicationRequiredError');
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -159,15 +163,15 @@ export function OfferFormDialog({
       <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEdit ? 'Edit offer' : 'New offer'}</DialogTitle>
-            <DialogDescription>Record the terms of an offer so you can compare and decide.</DialogDescription>
+            <DialogTitle>{isEdit ? t('offerForm.editTitle') : t('offerForm.newTitle')}</DialogTitle>
+            <DialogDescription>{t('offerForm.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Application *</Label>
+              <Label>{t('interviewForm.applicationLabel')}</Label>
               <Select items={applicationItems} value={values.applicationId} onValueChange={(v) => set('applicationId', v)}>
-                <SelectTrigger className="w-full" aria-invalid={!!errors.applicationId}><SelectValue placeholder="Select application" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-invalid={!!errors.applicationId}><SelectValue placeholder={t('interviewForm.selectApplication')} /></SelectTrigger>
                 <SelectContent>
                   {applications.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
@@ -181,29 +185,29 @@ export function OfferFormDialog({
 
             <div className="grid grid-cols-4 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="baseSalary">Base salary</Label>
+                <Label htmlFor="baseSalary">{t('offers.baseSalary')}</Label>
                 <Input id="baseSalary" type="number" value={values.baseSalary} onChange={(e) => set('baseSalary', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="bonus">Bonus</Label>
+                <Label htmlFor="bonus">{t('offerForm.bonus')}</Label>
                 <Input id="bonus" type="number" value={values.bonus} onChange={(e) => set('bonus', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>Currency</Label>
+                <Label>{t('applicationForm.currency')}</Label>
                 <Select value={values.currency} onValueChange={(v) => set('currency', v)}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{enumLabel('currency', c)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Gross/Net</Label>
+                <Label>{t('offerForm.grossNet')}</Label>
                 <Select value={values.grossNet} onValueChange={(v) => set('grossNet', v)}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Gross">Gross</SelectItem>
-                    <SelectItem value="Net">Net</SelectItem>
+                    <SelectItem value="Gross">{enumLabel('grossNet', 'Gross')}</SelectItem>
+                    <SelectItem value="Net">{enumLabel('grossNet', 'Net')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -211,19 +215,19 @@ export function OfferFormDialog({
 
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="equity">Equity</Label>
+                <Label htmlFor="equity">{t('offerForm.equity')}</Label>
                 <Input id="equity" value={values.equity} onChange={(e) => set('equity', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="vacation">Vacation</Label>
-                <Input id="vacation" value={values.vacation} onChange={(e) => set('vacation', e.target.value)} placeholder="e.g. 20 days" />
+                <Label htmlFor="vacation">{t('offerForm.vacation')}</Label>
+                <Input id="vacation" value={values.vacation} onChange={(e) => set('vacation', e.target.value)} placeholder={t('offerForm.vacationPlaceholder')} />
               </div>
               <div className="grid gap-2">
-                <Label>Remote</Label>
+                <Label>{t('offerForm.remote')}</Label>
                 <Select value={values.remote} onValueChange={(v) => set('remote', v)}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    {WORK_TYPES.map((w) => <SelectItem key={w} value={w}>{w}</SelectItem>)}
+                    {WORK_TYPES.map((w) => <SelectItem key={w} value={w}>{enumLabel('workType', w)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -231,44 +235,44 @@ export function OfferFormDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="probation">Probation</Label>
-                <Input id="probation" value={values.probation} onChange={(e) => set('probation', e.target.value)} placeholder="e.g. 3 months" />
+                <Label htmlFor="probation">{t('offerForm.probation')}</Label>
+                <Input id="probation" value={values.probation} onChange={(e) => set('probation', e.target.value)} placeholder={t('offerForm.probationPlaceholder')} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="benefits">Benefits</Label>
+                <Label htmlFor="benefits">{t('offerForm.benefits')}</Label>
                 <Input id="benefits" value={values.benefits} onChange={(e) => set('benefits', e.target.value)} />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="offerDate">Offer date</Label>
+                <Label htmlFor="offerDate">{t('offers.offerDate')}</Label>
                 <Input id="offerDate" type="date" value={values.offerDate} onChange={(e) => set('offerDate', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="deadline">Deadline</Label>
+                <Label htmlFor="deadline">{t('offers.deadline')}</Label>
                 <Input id="deadline" type="date" value={values.deadline} onChange={(e) => set('deadline', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>Decision *</Label>
+                <Label>{t('offerForm.decisionLabel')}</Label>
                 <Select value={values.decision} onValueChange={(v) => set('decision', v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {OFFER_DECISIONS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                    {OFFER_DECISIONS.map((d) => <SelectItem key={d} value={d}>{enumLabel('offerDecision', d)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('common.notes')}</Label>
               <Textarea id="notes" rows={3} value={values.notes} onChange={(e) => set('notes', e.target.value)} />
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <SubmitButton pending={pending}>{isEdit ? 'Save changes' : 'Create offer'}</SubmitButton>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
+            <SubmitButton pending={pending}>{isEdit ? t('common.saveChanges') : t('offerForm.createOffer')}</SubmitButton>
           </DialogFooter>
         </form>
       </DialogContent>

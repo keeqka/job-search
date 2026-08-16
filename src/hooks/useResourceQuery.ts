@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiCreate, apiDelete, apiList, apiUpdate, ApiError } from '@/lib/api/client';
+import i18n from '@/i18n';
 import type { ResourceName } from '@/types';
 
 function errorMessage(err: unknown): string {
-  return err instanceof ApiError || err instanceof Error ? err.message : 'Unknown error';
+  return err instanceof ApiError || err instanceof Error ? err.message : i18n.t('apiErrors.unknownError');
+}
+
+/** i18next keys can't contain the dash in 'cv-versions', so map to a safe key. */
+function resourceKey(resource: ResourceName): string {
+  return resource === 'cv-versions' ? 'cvVersions' : resource;
 }
 
 export function useResourceList<T>(resource: ResourceName) {
@@ -22,7 +28,7 @@ export function useResourceList<T>(resource: ResourceName) {
  * lastActivity) without an extra round-trip.
  */
 
-export function useResourceCreate<T extends { id: string }>(resource: ResourceName, label: string) {
+export function useResourceCreate<T extends { id: string }>(resource: ResourceName, _label: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<T>) => apiCreate<T>(resource, data),
@@ -38,7 +44,7 @@ export function useResourceCreate<T extends { id: string }>(resource: ResourceNa
       qc.setQueryData<T[]>([resource], (old) =>
         old?.map((item) => (item.id === context?.tempId ? created : item)) ?? [created],
       );
-      toast.success(`${label} created`);
+      toast.success(i18n.t(`toasts.${resourceKey(resource)}.created`));
     },
     onError: (err, _data, context) => {
       if (context?.previous) qc.setQueryData([resource], context.previous);
@@ -47,7 +53,7 @@ export function useResourceCreate<T extends { id: string }>(resource: ResourceNa
   });
 }
 
-export function useResourceUpdate<T extends { id: string }>(resource: ResourceName, label: string) {
+export function useResourceUpdate<T extends { id: string }>(resource: ResourceName, _label: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<T> }) => apiUpdate<T>(resource, id, data),
@@ -61,7 +67,7 @@ export function useResourceUpdate<T extends { id: string }>(resource: ResourceNa
     },
     onSuccess: (updated) => {
       qc.setQueryData<T[]>([resource], (old) => old?.map((item) => (item.id === updated.id ? updated : item)));
-      toast.success(`${label} updated`);
+      toast.success(i18n.t(`toasts.${resourceKey(resource)}.updated`));
     },
     onError: (err, _vars, context) => {
       if (context?.previous) qc.setQueryData([resource], context.previous);
@@ -70,7 +76,7 @@ export function useResourceUpdate<T extends { id: string }>(resource: ResourceNa
   });
 }
 
-export function useResourceDelete<T extends { id: string }>(resource: ResourceName, label: string) {
+export function useResourceDelete<T extends { id: string }>(resource: ResourceName, _label: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => apiDelete(resource, id),
@@ -80,7 +86,7 @@ export function useResourceDelete<T extends { id: string }>(resource: ResourceNa
       qc.setQueryData<T[]>([resource], (old) => old?.filter((item) => item.id !== id));
       return { previous };
     },
-    onSuccess: () => toast.success(`${label} deleted`),
+    onSuccess: () => toast.success(i18n.t(`toasts.${resourceKey(resource)}.deleted`)),
     onError: (err, _id, context) => {
       if (context?.previous) qc.setQueryData([resource], context.previous);
       toast.error(errorMessage(err));
@@ -88,13 +94,13 @@ export function useResourceDelete<T extends { id: string }>(resource: ResourceNa
   });
 }
 
-export function useResourceBulkDelete<T extends { id: string }>(resource: ResourceName, label: string) {
+export function useResourceBulkDelete<T extends { id: string }>(resource: ResourceName, _label: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (ids: string[]) => {
       const results = await Promise.allSettled(ids.map((id) => apiDelete(resource, id)));
       const failed = results.filter((r) => r.status === 'rejected').length;
-      if (failed > 0) throw new Error(`Failed to delete ${failed} of ${ids.length} item(s)`);
+      if (failed > 0) throw new Error(i18n.t('apiErrors.bulkDeleteFailed', { failed, total: ids.length }));
       return ids;
     },
     onMutate: async (ids) => {
@@ -104,7 +110,7 @@ export function useResourceBulkDelete<T extends { id: string }>(resource: Resour
       qc.setQueryData<T[]>([resource], (old) => old?.filter((item) => !idSet.has(item.id)));
       return { previous };
     },
-    onSuccess: (ids) => toast.success(`${ids.length} ${label}${ids.length === 1 ? '' : 's'} deleted`),
+    onSuccess: (ids) => toast.success(i18n.t(`toasts.${resourceKey(resource)}.bulkDeleted`, { count: ids.length })),
     onError: (err, _ids, context) => {
       if (context?.previous) qc.setQueryData([resource], context.previous);
       toast.error(errorMessage(err));
@@ -112,7 +118,7 @@ export function useResourceBulkDelete<T extends { id: string }>(resource: Resour
   });
 }
 
-export function useResourceBulkUpdate<T extends { id: string }>(resource: ResourceName, label: string) {
+export function useResourceBulkUpdate<T extends { id: string }>(resource: ResourceName, _label: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ ids, data }: { ids: string[]; data: Partial<T> }) => {
@@ -123,7 +129,7 @@ export function useResourceBulkUpdate<T extends { id: string }>(resource: Resour
         if (r.status === 'fulfilled') updated.push(r.value);
         else failed += 1;
       }
-      if (failed > 0) throw new Error(`Failed to update ${failed} of ${ids.length} item(s)`);
+      if (failed > 0) throw new Error(i18n.t('apiErrors.bulkUpdateFailed', { failed, total: ids.length }));
       return updated;
     },
     onMutate: async ({ ids, data }) => {
@@ -140,7 +146,7 @@ export function useResourceBulkUpdate<T extends { id: string }>(resource: Resour
         const byId = new Map(updated.map((u) => [u.id, u]));
         return old?.map((item) => byId.get(item.id) ?? item);
       });
-      toast.success(`${updated.length} ${label}${updated.length === 1 ? '' : 's'} updated`);
+      toast.success(i18n.t(`toasts.${resourceKey(resource)}.bulkUpdated`, { count: updated.length }));
     },
     onError: (err, _vars, context) => {
       if (context?.previous) qc.setQueryData([resource], context.previous);

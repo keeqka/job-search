@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiUpdate } from '@/lib/api/client';
+import i18n from '@/i18n';
 import {
   useResourceBulkDelete,
   useResourceBulkUpdate,
@@ -39,7 +40,7 @@ export function useUpdateApplicationStatus() {
       if (context?.previous) qc.setQueryData([RESOURCE], context.previous);
       toast.error(errorMessage(err));
     },
-    onSuccess: () => toast.success('Status updated'),
+    onSuccess: () => toast.success(i18n.t('applications.statusUpdated')),
     onSettled: () => qc.invalidateQueries({ queryKey: [RESOURCE] }),
   });
 }

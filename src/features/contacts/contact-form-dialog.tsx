@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import {
 import { CONTACT_ROLES, type Contact } from '@/types';
 import { useCompanies } from '@/features/companies/hooks';
 import { useCreateContact, useUpdateContact } from '@/features/contacts/hooks';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface FormValues {
   name: string;
@@ -81,6 +83,8 @@ export function ContactFormDialog({
   contact?: Contact;
   defaultCompanyId?: string;
 }) {
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
   const isEdit = !!contact;
   const [values, setValues] = useState<FormValues>(() => toFormValues(contact));
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -107,7 +111,7 @@ export function ContactFormDialog({
 
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof FormValues, string>> = {};
-    if (!values.name.trim()) nextErrors.name = 'Name is required';
+    if (!values.name.trim()) nextErrors.name = t('contactForm.nameRequiredError');
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -143,14 +147,14 @@ export function ContactFormDialog({
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEdit ? 'Edit contact' : 'New contact'}</DialogTitle>
-            <DialogDescription>Recruiters, hiring managers and other people you talk to.</DialogDescription>
+            <DialogTitle>{isEdit ? t('contactForm.editTitle') : t('contactForm.newTitle')}</DialogTitle>
+            <DialogDescription>{t('contactForm.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t('companyForm.nameLabel')}</Label>
                 <Input
                   id="name"
                   value={values.name}
@@ -161,18 +165,18 @@ export function ContactFormDialog({
                 <FieldError message={errors.name} />
               </div>
               <div className="grid gap-2">
-                <Label>Role</Label>
+                <Label>{t('applicationDetail.role')}</Label>
                 <Select value={values.role} onValueChange={(v) => set('role', v)}>
-                  <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('contactForm.selectRole')} /></SelectTrigger>
                   <SelectContent>
-                    {CONTACT_ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    {CONTACT_ROLES.map((r) => <SelectItem key={r} value={r}>{enumLabel('contactRole', r)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label>Company</Label>
+              <Label>{t('common.company')}</Label>
               <Select items={companyItems} value={values.companyId} onValueChange={(v) => set('companyId', v)}>
                 <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
@@ -187,50 +191,50 @@ export function ContactFormDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('contactForm.email')}</Label>
                 <Input id="email" type="email" value={values.email} onChange={(e) => set('email', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('contactForm.phone')}</Label>
                 <Input id="phone" value={values.phone} onChange={(e) => set('phone', e.target.value)} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="telegram">Telegram</Label>
+                <Label htmlFor="telegram">{t('contactForm.telegram')}</Label>
                 <Input id="telegram" value={values.telegram} onChange={(e) => set('telegram', e.target.value)} placeholder="@username" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="linkedin">LinkedIn</Label>
+                <Label htmlFor="linkedin">{t('common.linkedin')}</Label>
                 <Input id="linkedin" value={values.linkedin} onChange={(e) => set('linkedin', e.target.value)} />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="firstContact">First contact</Label>
+                <Label htmlFor="firstContact">{t('contactForm.firstContact')}</Label>
                 <Input id="firstContact" type="date" value={values.firstContact} onChange={(e) => set('firstContact', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="lastContact">Last contact</Label>
+                <Label htmlFor="lastContact">{t('contactForm.lastContact')}</Label>
                 <Input id="lastContact" type="date" value={values.lastContact} onChange={(e) => set('lastContact', e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="nextContact">Next contact</Label>
+                <Label htmlFor="nextContact">{t('contactForm.nextContact')}</Label>
                 <Input id="nextContact" type="date" value={values.nextContact} onChange={(e) => set('nextContact', e.target.value)} />
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('common.notes')}</Label>
               <Textarea id="notes" rows={3} value={values.notes} onChange={(e) => set('notes', e.target.value)} />
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <SubmitButton pending={pending}>{isEdit ? 'Save changes' : 'Create contact'}</SubmitButton>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
+            <SubmitButton pending={pending}>{isEdit ? t('common.saveChanges') : t('contactForm.createContact')}</SubmitButton>
           </DialogFooter>
         </form>
       </DialogContent>

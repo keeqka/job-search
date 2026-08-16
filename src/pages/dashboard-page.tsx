@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Bar,
   BarChart,
@@ -21,6 +22,7 @@ import { useInterviews } from '@/features/interviews/hooks';
 import { useOffers } from '@/features/offers/hooks';
 import type { ApplicationStatus } from '@/types';
 import { CHART_AXIS, CHART_GRID, chartColor } from '@/lib/chart-colors';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import {
   applicationsPerWeek,
   countBySource,
@@ -33,7 +35,9 @@ import {
 const chartMargin = { top: 4, right: 8, left: -20, bottom: 0 };
 
 export function DashboardPage() {
-  usePageTitle('Dashboard');
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
+  usePageTitle(t('nav.dashboard'));
   const navigate = useNavigate();
   const { data: applications, isLoading, isError, refetch } = useApplications();
   const { data: interviews = [] } = useInterviews();
@@ -61,20 +65,23 @@ export function DashboardPage() {
 
   const pipeline = useMemo(() => pipelineCounts(apps), [apps]);
   const perWeek = useMemo(() => applicationsPerWeek(apps, 8), [apps]);
-  const bySource = useMemo(() => countBySource(apps), [apps]);
+  const bySource = useMemo(
+    () => countBySource(apps).map((s) => ({ ...s, sourceLabel: enumLabel('source', s.source) })),
+    [apps, enumLabel],
+  );
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState message="Failed to load dashboard data." onRetry={() => refetch()} />;
+  if (isError) return <ErrorState message={t('dashboard.failedToLoad')} onRetry={() => refetch()} />;
 
   if (apps.length === 0) {
     return (
       <EmptyState
-        title="No applications yet"
-        description="Start tracking your job search — add your first application to see stats here."
+        title={t('dashboard.noApplicationsTitle')}
+        description={t('dashboard.noApplicationsDescription')}
         action={
           <div className="flex gap-2">
             <Button onClick={() => navigate('/applications', { state: { openCreate: true } })}>
-              Add your first application
+              {t('dashboard.addFirst')}
             </Button>
             <SeedDataButton />
           </div>
@@ -86,17 +93,17 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <StatTile label="Total Applications" value={kpis.total} />
-        <StatTile label="This Week" value={kpis.thisWeek} />
-        <StatTile label="Active" value={kpis.active} />
-        <StatTile label="Interviews" value={kpis.interviews} hint={`${kpis.technicalInterviews} technical`} />
-        <StatTile label="Offers" value={kpis.offers} hint={`${kpis.acceptedOffers} accepted`} />
-        <StatTile label="Interview Conversion" value={`${kpis.interviewConversion}%`} />
-        <StatTile label="Offer Conversion" value={`${kpis.offerConversion}%`} />
+        <StatTile label={t('dashboard.totalApplications')} value={kpis.total} />
+        <StatTile label={t('dashboard.thisWeek')} value={kpis.thisWeek} />
+        <StatTile label={t('dashboard.active')} value={kpis.active} />
+        <StatTile label={t('dashboard.interviews')} value={kpis.interviews} hint={t('dashboard.technicalHint', { count: kpis.technicalInterviews })} />
+        <StatTile label={t('dashboard.offers')} value={kpis.offers} hint={t('dashboard.acceptedHint', { count: kpis.acceptedOffers })} />
+        <StatTile label={t('dashboard.interviewConversion')} value={`${kpis.interviewConversion}%`} />
+        <StatTile label={t('dashboard.offerConversion')} value={`${kpis.offerConversion}%`} />
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Pipeline</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">{t('dashboard.pipeline')}</CardTitle></CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
             {pipeline.map(({ status, count }) => (
@@ -111,7 +118,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">Applications per week</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('dashboard.applicationsPerWeek')}</CardTitle></CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={perWeek} margin={chartMargin}>
@@ -122,28 +129,28 @@ export function DashboardPage() {
                   cursor={{ fill: 'var(--muted)' }}
                   contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }}
                 />
-                <Bar dataKey="count" name="Applications" fill={chartColor(0)} radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar dataKey="count" name={t('nav.applications')} fill={chartColor(0)} radius={[4, 4, 0, 0]} maxBarSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Applications by source</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('dashboard.applicationsBySource')}</CardTitle></CardHeader>
           <CardContent className="h-64">
             {bySource.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No data yet.</p>
+              <p className="text-sm text-muted-foreground">{t('dashboard.noData')}</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bySource} layout="vertical" margin={chartMargin}>
                   <CartesianGrid stroke={CHART_GRID} horizontal={false} />
                   <XAxis type="number" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <YAxis dataKey="source" type="category" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} width={130} />
+                  <YAxis dataKey="sourceLabel" type="category" stroke={CHART_AXIS} fontSize={12} tickLine={false} axisLine={false} width={130} />
                   <Tooltip
                     cursor={{ fill: 'var(--muted)' }}
                     contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }}
                   />
-                  <Bar dataKey="count" name="Applications" fill={chartColor(1)} radius={[0, 4, 4, 0]} maxBarSize={20} />
+                  <Bar dataKey="count" name={t('nav.applications')} fill={chartColor(1)} radius={[0, 4, 4, 0]} maxBarSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             )}

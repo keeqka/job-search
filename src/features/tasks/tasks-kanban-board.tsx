@@ -16,6 +16,7 @@ import { PriorityBadge } from '@/features/applications/status-badge';
 import { formatDate } from '@/lib/utils/computed';
 import { useUpdateTask } from '@/features/tasks/hooks';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 
 interface KanbanCardData {
   task: Task;
@@ -33,6 +34,7 @@ function KanbanCard({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: data.task.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
+  const enumLabel = useEnumLabel();
 
   return (
     <div
@@ -46,7 +48,7 @@ function KanbanCard({
         (isDragging || dragging) && 'opacity-50',
       )}
     >
-      <div className="mb-1 font-medium">{data.task.type}</div>
+      <div className="mb-1 font-medium">{enumLabel('taskType', data.task.type)}</div>
       {data.context && <TruncateTooltip className="mb-2 text-xs text-muted-foreground">{data.context}</TruncateTooltip>}
       <div className="flex items-center justify-between gap-2">
         <PriorityBadge priority={data.task.priority} />
@@ -67,10 +69,11 @@ function KanbanColumn({
   onOpen: (task: Task) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
+  const enumLabel = useEnumLabel();
   return (
     <div className="flex w-72 shrink-0 flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
-        <span className="text-sm font-medium">{status}</span>
+        <span className="text-sm font-medium">{enumLabel('taskStatus', status)}</span>
         <span className="text-xs text-muted-foreground">{cards.length}</span>
       </div>
       <div

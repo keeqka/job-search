@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { CalendarCheck, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePageTitle } from '@/components/layout/page-title-context';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,10 +15,12 @@ import { useCompanies } from '@/features/companies/hooks';
 import { InterviewFormDialog } from '@/features/interviews/interview-form-dialog';
 import { InterviewDetailSheet } from '@/features/interviews/interview-detail-sheet';
 import { TruncateTooltip } from '@/components/truncate-tooltip';
+import { useEnumLabel } from '@/i18n/enum-labels';
 import type { Interview } from '@/types';
 
 export function InterviewsPage() {
-  usePageTitle('Interviews');
+  const { t } = useTranslation();
+  usePageTitle(t('nav.interviews'));
   const { data: interviews, isLoading, isError, refetch } = useInterviews();
   const { data: applications = [] } = useApplications();
   const { data: companies = [] } = useCompanies();
@@ -36,7 +39,7 @@ export function InterviewsPage() {
   function titleFor(interview: Interview) {
     const app = applicationById.get(interview.applicationId);
     const company = app ? companyById.get(app.companyId) : undefined;
-    return app ? `${app.position} — ${company?.name ?? 'Unknown'}` : 'Unknown application';
+    return app ? `${app.position} — ${company?.name ?? t('common.unknown')}` : t('interviews.unknownApplication');
   }
 
   const sorted = useMemo(
@@ -76,31 +79,31 @@ export function InterviewsPage() {
       <div className="flex items-center justify-between">
         <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
           <TabsList>
-            <TabsTrigger value="list">List</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="list">{t('interviews.list')}</TabsTrigger>
+            <TabsTrigger value="calendar">{t('interviews.calendar')}</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button onClick={openCreate}>
-          <Plus className="size-4" /> New interview
+          <Plus className="size-4" /> {t('interviews.new')}
         </Button>
       </div>
 
       {isLoading && <LoadingState />}
-      {isError && <ErrorState message="Failed to load interviews." onRetry={() => refetch()} />}
+      {isError && <ErrorState message={t('interviews.failedToLoad')} onRetry={() => refetch()} />}
 
       {!isLoading && !isError && isEmpty && (
         <EmptyState
           icon={CalendarCheck}
-          title="No interviews yet"
-          description="Interviews you log against applications will show up here."
-          action={<Button onClick={openCreate}>Add your first interview</Button>}
+          title={t('interviews.noInterviewsYet')}
+          description={t('interviews.emptyDescription')}
+          action={<Button onClick={openCreate}>{t('interviews.addFirst')}</Button>}
         />
       )}
 
       {!isLoading && !isError && !isEmpty && view === 'list' && (
         <div className="animate-in fade-in-0 duration-300 space-y-6">
-          <InterviewGroup title="Upcoming" items={upcoming} titleFor={titleFor} onOpen={setDetail} />
-          <InterviewGroup title="Past" items={past} titleFor={titleFor} onOpen={setDetail} />
+          <InterviewGroup title={t('interviews.upcoming')} items={upcoming} titleFor={titleFor} onOpen={setDetail} />
+          <InterviewGroup title={t('interviews.past')} items={past} titleFor={titleFor} onOpen={setDetail} />
         </div>
       )}
 
@@ -118,9 +121,9 @@ export function InterviewsPage() {
             </CardContent>
           </Card>
           <div className="space-y-2">
-            {!selectedDate && <p className="text-sm text-muted-foreground">Select a day to see its interviews.</p>}
+            {!selectedDate && <p className="text-sm text-muted-foreground">{t('interviews.selectDay')}</p>}
             {selectedDate && selectedDayInterviews.length === 0 && (
-              <p className="text-sm text-muted-foreground">No interviews on this day.</p>
+              <p className="text-sm text-muted-foreground">{t('interviews.noneOnThisDay')}</p>
             )}
             {selectedDayInterviews.map((i) => (
               <InterviewRow key={i.id} interview={i} title={titleFor(i)} onClick={() => setDetail(i)} />
@@ -143,7 +146,7 @@ export function InterviewsPage() {
       <ConfirmDeleteDialog
         open={!!deletingId}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete this interview?"
+        title={t('interviews.deleteTitle')}
         onConfirm={() => {
           if (deletingId) deleteInterview.mutate(deletingId);
           setDeletingId(null);
@@ -165,11 +168,12 @@ function InterviewGroup({
   titleFor: (i: Interview) => string;
   onOpen: (i: Interview) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <h3 className="mb-2 text-sm font-medium text-muted-foreground">{title} ({items.length})</h3>
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing here.</p>
+        <p className="text-sm text-muted-foreground">{t('interviews.nothingHere')}</p>
       ) : (
         <div className="space-y-2">
           {items.map((i) => (
@@ -182,6 +186,8 @@ function InterviewGroup({
 }
 
 function InterviewRow({ interview, title, onClick }: { interview: Interview; title: string; onClick: () => void }) {
+  const { t } = useTranslation();
+  const enumLabel = useEnumLabel();
   return (
     <button
       onClick={onClick}
@@ -189,7 +195,7 @@ function InterviewRow({ interview, title, onClick }: { interview: Interview; tit
     >
       <div className="min-w-0 flex-1">
         <TruncateTooltip className="font-medium">{title}</TruncateTooltip>
-        <p className="text-muted-foreground">{interview.type} interview</p>
+        <p className="text-muted-foreground">{t('interviews.typeInterview', { type: enumLabel('interviewType', interview.type) })}</p>
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <span className="text-muted-foreground">{formatDate(interview.date)}</span>
@@ -200,6 +206,7 @@ function InterviewRow({ interview, title, onClick }: { interview: Interview; tit
 }
 
 function StatusResultBadge({ result }: { result: Interview['result'] }) {
+  const enumLabel = useEnumLabel();
   const map: Record<Interview['result'], string> = {
     Scheduled: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400',
     Passed: 'bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400',
@@ -207,5 +214,5 @@ function StatusResultBadge({ result }: { result: Interview['result'] }) {
     Waiting: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400',
     Cancelled: 'bg-slate-100 text-slate-600 dark:bg-slate-500/15 dark:text-slate-400',
   };
-  return <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${map[result]}`}>{result}</span>;
+  return <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${map[result]}`}>{enumLabel('interviewResult', result)}</span>;
 }

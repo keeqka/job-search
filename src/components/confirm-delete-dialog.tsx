@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,8 +13,8 @@ import {
 export function ConfirmDeleteDialog({
   open,
   onOpenChange,
-  title = 'Are you sure?',
-  description = 'This action cannot be undone.',
+  title,
+  description,
   onConfirm,
 }: {
   open: boolean;
@@ -22,20 +23,21 @@ export function ConfirmDeleteDialog({
   description?: string;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle>{title ?? t('confirmDelete.title')}</AlertDialogTitle>
+          <AlertDialogDescription>{description ?? t('confirmDelete.description')}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-white hover:bg-destructive/90"
             onClick={onConfirm}
           >
-            Delete
+            {t('common.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
